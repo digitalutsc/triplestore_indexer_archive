@@ -1,0 +1,7 @@
+triplestore_indexer.default_form:
+  path: '/admin/triplestore_indexer/form/default'
+  defaults:
+    _form: '\Drupal\triplestore_indexer\Form\DefaultForm'
+    _title: 'DefaultForm'
+  requirements:
+    _access: 'TRUE'

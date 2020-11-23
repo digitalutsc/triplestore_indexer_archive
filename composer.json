@@ -1,0 +1,13 @@
+{
+    "name": "triplestore_indexer",
+    "type": "drupal-module",
+    "description": "This module will listening to Content event and indexing it to RDF and send result to Triple store",
+    "keywords": [
+    ],
+    "homepage": "https://www.drupal.org/project/triplestore_indexer",
+    "minimum-stability": "dev",
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/triplestore_indexer",
+        "source": "http://cgit.drupalcode.org/triplestore_indexer",
+    },
+}
