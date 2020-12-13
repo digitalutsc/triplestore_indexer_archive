@@ -5,3 +5,12 @@ triplestore_indexer.default_form:
     _title: 'DefaultForm'
   requirements:
     _access: 'TRUE'
+triplestore_indexer.triplestore_indexer_config_form:
+  path: '/admin/config/triplestore_indexer/configuration'
+  defaults:
+    _form: '\Drupal\triplestore_indexer\Form\TripleStoreIndexerConfigForm'
+    _title: 'Triplestore Indexer'
+  requirements:
+    _permission: 'access administration pages'
+  options:
+    _admin_route: TRUE
