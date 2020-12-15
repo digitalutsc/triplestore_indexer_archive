@@ -108,3 +108,48 @@ function tripleStore_post($params) {
 
   curl_close($ch);
 }
+
+
+/**
+ * Custom Encrypt function
+ *
+ * https://www.geeksforgeeks.org/how-to-encrypt-and-decrypt-a-php-string/
+ *
+ * @param type $stringToEncrypt : string to encyrpt
+ * @param type $encryption_key : module name
+ * @param type $encryption_iv : timestamp of application
+ */
+function secureEncryption($stringToEncrypt, $encryption_key, $encryption_iv)
+{
+  // Store the cipher method
+  $ciphering = "AES-128-CTR";
+
+  // Use OpenSSl Encryption method
+  $iv_length = openssl_cipher_iv_length($ciphering);
+  $options = 0;
+
+  // Use openssl_encrypt() function to encrypt the data
+  return openssl_encrypt($stringToEncrypt, $ciphering,
+    $encryption_key, $options, $encryption_iv);
+}
+
+/**
+ * Custom Decryption function
+ *
+ * https://www.geeksforgeeks.org/how-to-encrypt-and-decrypt-a-php-string/
+ * @param type $stringToEncrypt : string to decrypt
+ * @param type $decryption_key : module name
+ * @param type $decryption_iv : timestamp of application
+ * @return type
+ */
+function secureDecryption($stringToEncrypt, $decryption_key, $decryption_iv)
+{
+  $ciphering = "AES-128-CTR";
+
+  // Use OpenSSl Encryption method
+  $iv_length = openssl_cipher_iv_length($ciphering);
+  $options = 0;
+  // Use openssl_decrypt() function to decrypt the data
+  return openssl_decrypt($stringToEncrypt, $ciphering,
+    $decryption_key, $options, $decryption_iv);
+}
