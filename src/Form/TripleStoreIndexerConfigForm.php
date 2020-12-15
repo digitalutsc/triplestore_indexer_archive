@@ -92,7 +92,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
     ];
 
 
-    $question_type =  ($config->get("method-of-auth") !== null) ? $config->get("method-of-auth") : $form_state->getValues()['select-auth-method'];
+    $question_type =  ($config->get("method-of-auth") !== null && !isset($form_state->getValues()['select-auth-method'])) ? $config->get("method-of-auth") : $form_state->getValues()['select-auth-method'];
 
     if (!empty($question_type) && $question_type !== -1) {
       unset($form['container']['triplestore-server-config']['auth-config']['question']);
@@ -111,7 +111,8 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
             '#title' => $this
               ->t('Password:'),
             '#required' => TRUE,
-            '#attributes' => ['value' => ($config->get('admin-password') !== null) ? $config->get('admin-password') : "", 'readonly' => ($config->get('admin-password') !== null) ? 'readonly' : false]
+            '#attributes' => ['value' => ($config->get('admin-password') !== null) ? $config->get('admin-password') : "", 'readonly' => ($config->get('admin-password') !== null) ? 'readonly' : false],
+            '#description' => $this->t('To reset the password, change Method of authentication to None first.')
           );
 
           break;
@@ -123,14 +124,16 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
             '#title' => $this
               ->t('Client ID:'),
             '#required' => TRUE,
-            '#default_value' => ($config->get("client_id") !== null) ? $config->get("client_id") : ""
+            '#default_value' => ($config->get("client_id") !== null) ? $config->get("client_id") : "",
+            '#description' => $this->t('To reset the Client ID, change Method of authentication to None first.')
           );
           $form['container']['triplestore-server-config']['auth-config']['client-secret'] = array(
             '#type' => 'textfield',
             '#title' => $this
               ->t('Client Secret:'),
             '#required' => TRUE,
-            '#default_value' => ($config->get("client-secret") !== null) ? $config->get("client-secret") : ""
+            '#default_value' => ($config->get("client-secret") !== null) ? $config->get("client-secret") : "",
+            '#description' => $this->t('To reset the Client Secret, change Method of authentication to None first.')
           );
           break;
         }
@@ -238,20 +241,23 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
           $configFactory->set('admin-password', secureEncryption($form_state->getValues()['admin-password'], "blahblabhalb", 739127941279412));
         }
 
-        $configFactory->set('client-id', "");
-        $configFactory->set('client-secret', "");
+        $configFactory->set('client-id', null);
+        $configFactory->set('client-secret', null);
 
         break;
       }
       case 'oauth': {
         $configFactory->set('client-id', $form_state->getValues()['client-id']);
         $configFactory->set('client-secret', $form_state->getValues()['client-secret']);
-        $configFactory->set('admin-username', "");
-        $configFactory->set('admin-password', "");
+        $configFactory->set('admin-username', null);
+        $configFactory->set('admin-password', null);
         break;
       }
       default: {
-
+        $configFactory->set('client-id', null);
+        $configFactory->set('client-secret', null);
+        $configFactory->set('admin-username', null);
+        $configFactory->set('admin-password', null);
         break;
       }
     }
