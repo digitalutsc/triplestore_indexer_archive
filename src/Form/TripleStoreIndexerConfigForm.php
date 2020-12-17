@@ -238,7 +238,9 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       case 'digest': {
         $configFactory->set('admin-username', $form_state->getValues()['admin-username']);
         if ($configFactory->get('admin-password') === null) {
-          $configFactory->set('admin-password', secureEncryption($form_state->getValues()['admin-password'], "blahblabhalb", 739127941279412));
+
+          //$service = \Drupal::service('triplestore_indexer.indexing');
+          $configFactory->set('admin-password', base64_encode($form_state->getValues()['admin-password']));
         }
 
         $configFactory->set('client-id', null);
@@ -270,9 +272,15 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
 
   }
 
+  /**
+   * For Ajax callback for depending dropdown list
+   *
+   * @param array $form
+   * @param FormStateInterface $form_state
+   * @return mixed
+   */
   public function promptCallback(array $form, FormStateInterface $form_state)
   {
-    print_log(promptCallback);
     return $form['container']['triplestore-server-config']['auth-config'];
   }
 

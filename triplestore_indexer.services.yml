@@ -1,0 +1,7 @@
+services:
+  logger.channel.triplestore_indexer:
+    parent: logger.channel_base
+    arguments: ['triplestore_indexer']
+  triplestore_indexer.indexing:
+    class: Drupal\triplestore_indexer\IndexingService
+    arguments: []
