@@ -74,13 +74,16 @@ class IndexingService implements TripleStoreIndexingInterface {
       CURLOPT_USERPWD, '',
       CURLOPT_HTTPHEADER => array(
         'Content-type: application/x-www-form-urlencoded',
-        'Authorization: Basic'
       ),
     );
 
     if ($config->get("method-of-auth") == 'digest') {
       $opts[CURLOPT_USERPWD] = $config->get('admin-username') . ":" . base64_decode($config->get('admin-password'));
       $opts[CURLOPT_HTTPAUTH] = CURLAUTH_DIGEST;
+      $opts[CURLOPT_HTTPHEADER] = array(
+        'Content-type: application/x-www-form-urlencoded',
+        'Authorization: Basic'
+      );
     }
     //print_log($opts);
     curl_setopt_array($curl, $opts);
