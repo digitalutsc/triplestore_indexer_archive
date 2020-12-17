@@ -37,43 +37,61 @@ function triplestore_indexer_theme()
 }
 
 /**
+ * Implementing action hook_entity_insert
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ */
+function triplestore_indexer_entity_insert(\Drupal\Core\Entity\EntityInterface $entity) {
+
+  //TODO: check if the entity is content type is selected and triggered event selected
+  $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
+  $triggeredEvents = array_keys(array_filter($config->get('events-to-index')));
+  $indexedContentTypes  = array_keys(array_filter($config->get('content-type-to-index')));
+
+  if (in_array("created", $triggeredEvents) && in_array($entity->bundle(), $indexedContentTypes)) {
+    $service = \Drupal::service('triplestore_indexer.indexing');
+    $data = $service->serialization($entity);
+    $service->post($data);
+  }
+}
+
+/**
  * Implementing action hook_enitty_update
  *
  * @param $entity
  * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
  * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
  */
-function triplestore_indexer_entity_update($entity) {
-  global $base_url;
-  print_log(triplestore_indexer_entity_update);
-  print_log($entity->id());
-  print_log($base_url);
-  print_log($entity->get('body')->getValue()[0]['value']);
-  print_log($entity->bundle());
+function triplestore_indexer_entity_update(\Drupal\Core\Entity\EntityInterface $entity) {
+  //TODO: check if the entity is content type is selected and triggered event selected
+  $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
+  $triggeredEvents = array_keys(array_filter($config->get('events-to-index')));
+  $indexedContentTypes  = array_keys(array_filter($config->get('content-type-to-index')));
 
-  $node = \Drupal::entityTypeManager()->getStorage('node')->load($entity->id());
-
-  // get author
-  $owner = $node->getOwner()->getDisplayName();
-  print_log($owner);
+  if (in_array("updated", $triggeredEvents) && in_array($entity->getEntityType(), $indexedContentTypes)) {
+    $service = \Drupal::service('triplestore_indexer.indexing');
+    $data = $service->serialization($entity);
+    $service->put($data);
+  }
 }
 
 /**
- * Implementing action hook_entity_insert
+ * Implementing action hook_entity_delete
  *
- * @param $entity
- * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
- * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * @param \Drupal\Core\Entity\EntityInterface $entity
  */
-function triplestore_indexer_entity_insert($entity) {
+function triplestore_indexer_entity_delete(\Drupal\Core\Entity\EntityInterface $entity) {
+  //TODO: check if the entity is content type is selected and triggered event selected
+  $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
+  $triggeredEvents = array_keys(array_filter($config->get('events-to-index')));
+  $indexedContentTypes  = array_keys(array_filter($config->get('content-type-to-index')));
 
-  $service = \Drupal::service('triplestore_indexer.indexing');
-
-  $data = $service->serialization($entity);
-  $service->post($data);
-
+  if (in_array("deleted", $triggeredEvents) && in_array($entity->getEntityType(), $indexedContentTypes)) {
+    $service = \Drupal::service('triplestore_indexer.indexing');
+    $data = $service->serialization($entity);
+    $service->delete($data);
+  }
 }
-
 
 /**
  * Debug function: display any variable to error log

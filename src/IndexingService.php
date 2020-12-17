@@ -71,7 +71,6 @@ class IndexingService implements TripleStoreIndexingInterface {
       CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
       CURLOPT_CUSTOMREQUEST => 'POST',
       CURLOPT_POSTFIELDS => $jsonld,
-      CURLOPT_USERPWD, '',
       CURLOPT_HTTPHEADER => array(
         'Content-type: application/x-www-form-urlencoded',
       ),

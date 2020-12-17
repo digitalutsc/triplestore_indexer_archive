@@ -226,8 +226,6 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
    */
   public function submitForm(array &$form, FormStateInterface $form_state)
   {
-    print_log($form_state->getValues());
-
     $configFactory = $this->configFactory->getEditable('triplestore_indexer.triplestoreindexerconfig');
 
     $configFactory->set('server-url', $form_state->getValues()['server-url'])
