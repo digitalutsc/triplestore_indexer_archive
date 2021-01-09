@@ -41,18 +41,10 @@ function triplestore_indexer_theme()
  *
  * @param \Drupal\Core\Entity\EntityInterface $entity
  */
-function triplestore_indexer_entity_insert(\Drupal\Core\Entity\EntityInterface $entity) {
+function triplestore_indexer_entity_insert(\Drupal\Core\Entity\EntityInterface $entity)
+{
+  drupal_register_shutdown_function('_indexing', $entity, 'insert');
 
-  //TODO: check if the entity is content type is selected and triggered event selected
-  $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
-  $triggeredEvents = array_keys(array_filter($config->get('events-to-index')));
-  $indexedContentTypes  = array_keys(array_filter($config->get('content-type-to-index')));
-
-  if (in_array("created", $triggeredEvents) && in_array($entity->bundle(), $indexedContentTypes)) {
-    $service = \Drupal::service('triplestore_indexer.indexing');
-    $data = $service->serialization($entity);
-    $service->post($data);
-  }
 }
 
 /**
@@ -62,17 +54,9 @@ function triplestore_indexer_entity_insert(\Drupal\Core\Entity\EntityInterface $
  * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
  * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
  */
-function triplestore_indexer_entity_update(\Drupal\Core\Entity\EntityInterface $entity) {
-  //TODO: check if the entity is content type is selected and triggered event selected
-  $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
-  $triggeredEvents = array_keys(array_filter($config->get('events-to-index')));
-  $indexedContentTypes  = array_keys(array_filter($config->get('content-type-to-index')));
-
-  if (in_array("updated", $triggeredEvents) && in_array($entity->getEntityType(), $indexedContentTypes)) {
-    $service = \Drupal::service('triplestore_indexer.indexing');
-    $data = $service->serialization($entity);
-    $service->put($data);
-  }
+function triplestore_indexer_entity_update(\Drupal\Core\Entity\EntityInterface $entity)
+{
+  drupal_register_shutdown_function('_indexing', $entity, 'update');
 }
 
 /**
@@ -80,18 +64,60 @@ function triplestore_indexer_entity_update(\Drupal\Core\Entity\EntityInterface $
  *
  * @param \Drupal\Core\Entity\EntityInterface $entity
  */
-function triplestore_indexer_entity_delete(\Drupal\Core\Entity\EntityInterface $entity) {
+function triplestore_indexer_entity_delete(\Drupal\Core\Entity\EntityInterface $entity)
+{
+  drupal_register_shutdown_function('_indexing', $entity, 'delete');
+}
+
+/**
+ * funcation call embedded after hook_insert,hook_update,hook_delete executed
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ * @param $action
+ */
+function _indexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
+{
+  print_log(_indexing);
   //TODO: check if the entity is content type is selected and triggered event selected
   $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
   $triggeredEvents = array_keys(array_filter($config->get('events-to-index')));
-  $indexedContentTypes  = array_keys(array_filter($config->get('content-type-to-index')));
+  $indexedContentTypes = array_keys(array_filter($config->get('content-type-to-index')));
 
-  if (in_array("deleted", $triggeredEvents) && in_array($entity->getEntityType(), $indexedContentTypes)) {
-    $service = \Drupal::service('triplestore_indexer.indexing');
-    $data = $service->serialization($entity);
-    $service->delete($data);
+  switch ($action) {
+    case 'insert':
+    {
+      if (in_array("created", $triggeredEvents) && in_array($entity->bundle(), $indexedContentTypes)) {
+        $service = \Drupal::service('triplestore_indexer.indexing');
+        $data = $service->serialization($entity);
+        $service->post($data);
+      }
+      break;
+    }
+    case 'update':
+    {
+      if (in_array("updated", $triggeredEvents) && in_array($entity->getEntityType(), $indexedContentTypes)) {
+        $service = \Drupal::service('triplestore_indexer.indexing');
+        $data = $service->serialization($entity);
+        $service->put($data);
+      }
+      break;
+    }
+    case 'delete':
+    {
+      if (in_array("deleted", $triggeredEvents) && in_array($entity->getEntityType(), $indexedContentTypes)) {
+        $service = \Drupal::service('triplestore_indexer.indexing');
+        $data = $service->serialization($entity);
+        $service->delete($data);
+      }
+      break;
+    }
+    default:{
+      break;
+    }
   }
+
 }
+
 
 /**
  * Debug function: display any variable to error log

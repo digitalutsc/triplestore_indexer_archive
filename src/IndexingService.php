@@ -22,6 +22,34 @@ class IndexingService implements TripleStoreIndexingInterface {
   public function serialization (\Drupal\Core\Entity\EntityInterface $entity) {
     global $base_url;
 
+    //TODO: make GET request to any content with _format=jsonld
+    $client = \Drupal::httpClient();
+    $uri = "$base_url/node/" .$entity->id(). '?_format=jsonld';
+    $request = $client->get($uri);
+    $graph = json_decode($request->getBody())['@graph'];
+    print_log($graph);
+
+    //TODO: convert jsonld to sparql grammar
+    foreach ($graph as $key => $object) {
+      $object = (array) $object;
+      foreach ($object as $field => $value) {
+
+      }
+
+
+
+    }
+    //TODO: append to $data
+
+    $params = "update=PREFIX  dc: <http://purl.org/dc/elements/1.1/> INSERT DATA { $data }";
+
+    return $params;
+  }
+
+
+  public function oldSerialziation(\Drupal\Core\Entity\EntityInterface $entity) {
+    global $base_url;
+
     // get nid from entity
     $nid = "<$base_url/node/" .$entity->id() .">";
     // get title
@@ -50,6 +78,7 @@ class IndexingService implements TripleStoreIndexingInterface {
 
     return $params;
   }
+
 
   /**
    *
