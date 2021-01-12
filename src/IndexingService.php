@@ -26,23 +26,45 @@ class IndexingService implements TripleStoreIndexingInterface {
     $client = \Drupal::httpClient();
     $uri = "$base_url/node/" .$entity->id(). '?_format=jsonld';
     $request = $client->get($uri);
-    $graph = json_decode($request->getBody())['@graph'];
-    print_log($graph);
+    $graph = json_decode($request->getBody())->{'@graph'};
 
     //TODO: convert jsonld to sparql grammar
-    foreach ($graph as $key => $object) {
-      $object = (array) $object;
-      foreach ($object as $field => $value) {
 
+    // under @graph, 1st object is main one.
+    $object = (array) $graph[0];
+
+    // send first 2 field is content type
+    $data = '<' . $object["@id"] . '> rdf:type "' . $object["@type"][0] . '"; ';
+    $i = 0;
+    $count = count($object);
+    foreach ($object as $field => $value) {
+      if (++$i === $count) {
+        $comma = "";
+      }
+      else {
+        $comma = ";";
       }
 
-
-
+      if (!in_array($field, ['@id', '@type']) ) {
+        if( strpos( $field, "schema.org" ) !== false) {
+          $parts = explode("/", $field);
+          $predicate = "schema:".  $parts[count($parts) -1];
+        }
+        if (property_exists($value[0], "@id" )) {
+          $data .=  $predicate . ' "' . preg_replace("/\r|\n/", "", $value[0]->{"@id"}) . '"' . $comma;
+        }
+        else if (property_exists($value[0], "@value" )) {
+          $data .=  $predicate . ' "' . preg_replace("/\r|\n/", "", $value[0]->{"@value"}) . '"'. $comma;
+        }
+      }
     }
-    //TODO: append to $data
 
-    $params = "update=PREFIX  dc: <http://purl.org/dc/elements/1.1/> INSERT DATA { $data }";
-
+    $params = "update=
+      PREFIX  dc: <http://purl.org/dc/elements/1.1/>
+      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      PREFIX schema: <http://schema.org/>
+      INSERT DATA { $data }";
     return $params;
   }
 
@@ -84,7 +106,7 @@ class IndexingService implements TripleStoreIndexingInterface {
    *
    * @param $params
    */
-  public function post($jsonld) {
+  public function post($data) {
     $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
     $server = $config->get("server-url");
     $namespace = $config->get("namespace");
@@ -99,7 +121,7 @@ class IndexingService implements TripleStoreIndexingInterface {
       CURLOPT_FOLLOWLOCATION => true,
       CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
       CURLOPT_CUSTOMREQUEST => 'POST',
-      CURLOPT_POSTFIELDS => $jsonld,
+      CURLOPT_POSTFIELDS => $data,
       CURLOPT_HTTPHEADER => array(
         'Content-type: application/x-www-form-urlencoded',
       ),
@@ -113,7 +135,6 @@ class IndexingService implements TripleStoreIndexingInterface {
         'Authorization: Basic'
       );
     }
-    //print_log($opts);
     curl_setopt_array($curl, $opts);
 
     $response = curl_exec($curl);
