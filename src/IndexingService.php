@@ -27,32 +27,9 @@ class IndexingService implements TripleStoreIndexingInterface {
     $client = \Drupal::httpClient();
     $uri = "$base_url/node/" .$entity->id(). '?_format=jsonld';
     $request = $client->get($uri);
-    $graph = json_decode($request->getBody())->{'@graph'};
+    $graph = $request->getBody();
 
-    //TODO: convert jsonld to sparql grammar
-    $data = '';
-    // under @graph, 1st object is main one.
-    foreach ($graph as $node) {
-      $node = (array)$node;
-
-      // send first 2 field is content type
-      $data .= '<' . $node["@id"] . '> rdf:type "' . $node["@type"][0] . '".';
-
-      foreach ($node as $field => $value) {
-
-        if (!in_array($field, ['@id', '@type'])) {
-          if (property_exists($value[0], "@id")) {
-            $data .= '<' . $node["@id"] . '> <' . $field . '> "' . preg_replace("/\r|\n/", "", $value[0]->{"@id"}) . '".';
-          } else if (property_exists($value[0], "@value")) {
-            $data .= '<' . $node["@id"] . '> <' . $field . '> "' . preg_replace("/\r|\n/", "", $value[0]->{"@value"}) . '".';
-          }
-        }
-      }
-    }
-
-    $params = "update=$op { $data } $where";
-    print_log($params);
-    return $params;
+    return "$graph ";
   }
 
   /**
@@ -76,7 +53,7 @@ class IndexingService implements TripleStoreIndexingInterface {
       CURLOPT_CUSTOMREQUEST => 'POST',
       CURLOPT_POSTFIELDS => $data,
       CURLOPT_HTTPHEADER => array(
-        'Content-type: application/x-www-form-urlencoded',
+        'Content-type: application/ld+json',
       ),
     );
 
@@ -84,7 +61,7 @@ class IndexingService implements TripleStoreIndexingInterface {
       $opts[CURLOPT_USERPWD] = $config->get('admin-username') . ":" . base64_decode($config->get('admin-password'));
       $opts[CURLOPT_HTTPAUTH] = CURLAUTH_DIGEST;
       $opts[CURLOPT_HTTPHEADER] = array(
-        'Content-type: application/x-www-form-urlencoded',
+        'Content-type: application/ld+json',
         'Authorization: Basic'
       );
     }
