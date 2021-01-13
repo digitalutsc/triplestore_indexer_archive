@@ -77,7 +77,6 @@ function triplestore_indexer_entity_delete(\Drupal\Core\Entity\EntityInterface $
  */
 function _indexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
 {
-  print_log(_indexing);
   //TODO: check if the entity is content type is selected and triggered event selected
   $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
   $triggeredEvents = array_keys(array_filter($config->get('events-to-index')));

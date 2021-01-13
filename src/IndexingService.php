@@ -46,25 +46,18 @@ class IndexingService implements TripleStoreIndexingInterface {
       }
 
       if (!in_array($field, ['@id', '@type']) ) {
-        if( strpos( $field, "schema.org" ) !== false) {
-          $parts = explode("/", $field);
-          $predicate = "schema:".  $parts[count($parts) -1];
-        }
+
         if (property_exists($value[0], "@id" )) {
-          $data .=  $predicate . ' "' . preg_replace("/\r|\n/", "", $value[0]->{"@id"}) . '"' . $comma;
+          $data .= '<' . $field . '> "' . preg_replace("/\r|\n/", "", $value[0]->{"@id"}) . '"' . $comma;
         }
         else if (property_exists($value[0], "@value" )) {
-          $data .=  $predicate . ' "' . preg_replace("/\r|\n/", "", $value[0]->{"@value"}) . '"'. $comma;
+          $data .= '<' . $field . '> "' . preg_replace("/\r|\n/", "", $value[0]->{"@value"}) . '"'. $comma;
         }
       }
     }
 
-    $params = "update=
-      PREFIX  dc: <http://purl.org/dc/elements/1.1/>
-      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-      PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-      PREFIX schema: <http://schema.org/>
-      INSERT DATA { $data }";
+    $params = "update=INSERT DATA { $data }";
+    //print_log($params);
     return $params;
   }
 
