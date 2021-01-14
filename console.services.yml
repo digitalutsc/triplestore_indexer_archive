@@ -1,0 +1,6 @@
+services:
+  triplestore_indexer.triplestore_indexing:
+    class: Drupal\triplestore_indexer\Command\IndexingCommand
+    arguments: []
+    tags:
+      - { name: drupal.command }
