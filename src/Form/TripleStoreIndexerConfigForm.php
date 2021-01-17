@@ -4,6 +4,8 @@ namespace Drupal\triplestore_indexer\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\advancedqueue\Entity\Queue;
+use Drupal\advancedqueue\Job;
 
 /**
  * Class TripleStoreIndexerConfigForm.
@@ -35,11 +37,6 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
   public function buildForm(array $form, FormStateInterface $form_state)
   {
     $config = $this->config('triplestore_indexer.triplestoreindexerconfig');
-    //return parent::buildForm($form, $form_state);
-
-    //$form = parent::buildForm($form, $form_state);
-    //logging(secureDecryption($config->get('admin-password'), 'blahblabhalb' , 739127941279412) );
-
 
     $form['container'] = array(
       '#type' => 'container',
@@ -52,6 +49,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
     );
     $form['container']['triplestore-server-config']['server-url'] = array(
       '#type' => 'textfield',
+      '#name' => 'server-url',
       '#title' => $this
         ->t('Server URL:'),
       '#required' => TRUE,
@@ -64,7 +62,6 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       '#required' => TRUE,
       '#default_value' => ($config->get("namespace") !== null) ? $config->get("namespace") : ""
     );
-
 
     $form['container']['triplestore-server-config']['select-auth-method'] = [
       '#type' => 'select',
@@ -92,7 +89,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
     ];
 
 
-    $question_type =  ($config->get("method-of-auth") !== null && !isset($form_state->getValues()['select-auth-method'])) ? $config->get("method-of-auth") : $form_state->getValues()['select-auth-method'];
+    $question_type = ($config->get("method-of-auth") !== null && !isset($form_state->getValues()['select-auth-method'])) ? $config->get("method-of-auth") : $form_state->getValues()['select-auth-method'];
 
     if (!empty($question_type) && $question_type !== -1) {
       unset($form['container']['triplestore-server-config']['auth-config']['question']);
@@ -145,6 +142,15 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       }
     }
 
+    $form['container']['triplestore-server-config']['advancedqueue-id'] = array(
+      '#type' => 'textfield',
+      '#name' => 'advancedqueue-id',
+      '#title' => $this
+        ->t('Queue:'),
+      '#required' => TRUE,
+      '#default_value' => ($config->get("advancedqueue-id") !== null) ? $config->get("advancedqueue-id") : "default",
+      '#description' => $this->t('<mark>Please enter <strong>machine name</strong> of the queue. To create or further detail of Advanced Queues, <a href="/admin/config/system/queues">Click here</a></mark>')
+    );
 
     $form['configuration'] = array(
       '#type' => 'vertical_tabs',
@@ -221,6 +227,33 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
     return $form;
   }
 
+  public function validateForm(array &$form, FormStateInterface $form_state)
+  {
+    // validate Server URL
+    try {
+      $client = \Drupal::service('http_client');
+      // Get articles from the API.
+      $response = $client->request('GET', $form_state->getValues()['server-url']);
+
+      if ($response->getStatusCode() !== 200) {
+        $form_state->setErrorByName("server-url",
+          t('Your Server URL is not valid, please check it again.'));
+      }
+    }
+    catch(\Exception $e) {
+      $form_state->setErrorByName("server-url",
+        t('Your Server URL is not valid, please check it again. <strong>Error message:</strong> '. $e->getMessage()));
+    }
+
+
+    // validate if entering a valid machine name of queue
+    $q = Queue::load($form_state->getValues()['advancedqueue-id']);
+    if (!isset($q)) {
+      $form_state->setErrorByName("advancedqueue-id",
+        t('This queue\'s machine name "' . $form_state->getValues()['advancedqueue-id'] . '" is not valid, please verify it by <a href="/admin/config/system/queues">clicking here</a>.'));
+    }
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -230,10 +263,10 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
 
     $configFactory->set('server-url', $form_state->getValues()['server-url'])
       ->set('namespace', $form_state->getValues()['namespace'])
-      ->set('method-of-auth', $form_state->getValues()['select-auth-method'])
-    ;
+      ->set('method-of-auth', $form_state->getValues()['select-auth-method']);
     switch ($form_state->getValues()['select-auth-method']) {
-      case 'digest': {
+      case 'digest':
+      {
         $configFactory->set('admin-username', $form_state->getValues()['admin-username']);
         if ($configFactory->get('admin-password') === null) {
 
@@ -246,14 +279,16 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
 
         break;
       }
-      case 'oauth': {
+      case 'oauth':
+      {
         $configFactory->set('client-id', $form_state->getValues()['client-id']);
         $configFactory->set('client-secret', $form_state->getValues()['client-secret']);
         $configFactory->set('admin-username', null);
         $configFactory->set('admin-password', null);
         break;
       }
-      default: {
+      default:
+      {
         $configFactory->set('client-id', null);
         $configFactory->set('client-secret', null);
         $configFactory->set('admin-username', null);
@@ -262,6 +297,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       }
     }
     $configFactory->set('events-to-index', $form_state->getValues()['select-when']);
+    $configFactory->set('advancedqueue-id', $form_state->getValues()['advancedqueue-id']);
     $configFactory->set('content-type-to-index', $form_state->getValues()['select-content-types']);
     $configFactory->set('taxonomy-to-index', $form_state->getValues()['select-vocabulary']);
     $configFactory->save();
