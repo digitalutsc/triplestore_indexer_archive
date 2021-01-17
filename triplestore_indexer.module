@@ -126,7 +126,7 @@ function preIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
         ];
         $job = Job::create('triplestore_index_job', $payload);
         if ($job instanceof Job) {
-          $q = Queue::load('events');
+          $q = Queue::load($config->get("advancedqueue-id"));
           $q->enqueueJob($job);
         }
 
@@ -145,7 +145,7 @@ function preIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
         ];
         $job = Job::create('triplestore_index_job', $payload);
         if ($job instanceof Job) {
-          $q = Queue::load('triplestore_indexing');
+          $q = Queue::load($config->get("advancedqueue-id"));
           $q->enqueueJob($job);
         }
 
@@ -164,7 +164,7 @@ function preIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
         ];
         $job = Job::create('triplestore_index_job', $payload);
         if ($job instanceof Job) {
-          $q = Queue::load('triplestore_indexing');
+          $q = Queue::load($config->get("advancedqueue-id"));
           $q->enqueueJob($job);
         }
       }
