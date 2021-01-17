@@ -5,27 +5,30 @@ namespace Drupal\triplestore_indexer;
 /**
  * Class IndexingService.
  */
-class IndexingService implements TripleStoreIndexingInterface {
+class IndexingService implements TripleStoreIndexingInterface
+{
 
   /**
    * Constructs a new IndexingService object.
    */
-  public function __construct() {
+  public function __construct()
+  {
 
   }
 
 
   /**
-   * @param \Drupal\Core\Entity\EntityInterface $entity
+   * @param $nid : node id
    * @param string $where eg. WHERE {}
    * @return string
    */
-  public function serialization (\Drupal\Core\Entity\EntityInterface $entity, String $op = "INSERT DATA",String $where = "") {
+  public function serialization($nid, string $op = "INSERT DATA", string $where = "")
+  {
     global $base_url;
 
     //TODO: make GET request to any content with _format=jsonld
     $client = \Drupal::httpClient();
-    $uri = "$base_url/node/" .$entity->id(). '?_format=jsonld';
+    $uri = "$base_url/node/" . $nid . '?_format=jsonld';
     $request = $client->get($uri);
     $graph = $request->getBody();
 
@@ -36,7 +39,8 @@ class IndexingService implements TripleStoreIndexingInterface {
    *
    * @param $params
    */
-  public function post($data) {
+  public function post($data)
+  {
     $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
     $server = $config->get("server-url");
     $namespace = $config->get("namespace");
@@ -89,16 +93,16 @@ class IndexingService implements TripleStoreIndexingInterface {
   }
 
 
-
-  public function oldSerialziation(\Drupal\Core\Entity\EntityInterface $entity) {
+  public function oldSerialziation(\Drupal\Core\Entity\EntityInterface $entity)
+  {
     global $base_url;
 
     // get nid from entity
-    $nid = "<$base_url/node/" .$entity->id() .">";
+    $nid = "<$base_url/node/" . $entity->id() . ">";
     // get title
-    $title = 'dc:title "' . $entity->getTitle(). '"';
+    $title = 'dc:title "' . $entity->getTitle() . '"';
     // get body
-    $body = 'dc:description "' .  trim(preg_replace('/\s+/', ' ',strip_tags($entity->get('body')->getValue()[0]['value']) )). '"';
+    $body = 'dc:description "' . trim(preg_replace('/\s+/', ' ', strip_tags($entity->get('body')->getValue()[0]['value']))) . '"';
 
     $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
 
@@ -107,13 +111,13 @@ class IndexingService implements TripleStoreIndexingInterface {
 
     // get author
     $owner = $node->getOwner()->getDisplayName();
-    $author = 'dc:creator "' . $owner . '"' ;
+    $author = 'dc:creator "' . $owner . '"';
 
     // get node type
     $type = 'dc:type "' . $entity->bundle() . '"';
 
     // get created time
-    $published_at = 'dc:date "'.  date("F j, Y, g:i a", $node->getCreatedTime()) . '"';
+    $published_at = 'dc:date "' . date("F j, Y, g:i a", $node->getCreatedTime()) . '"';
 
     $data = "$nid $title; $body; $type; $author; $published_at";
 
