@@ -45,17 +45,8 @@ function triplestore_indexer_theme()
 function triplestore_indexer_entity_insert(\Drupal\Core\Entity\EntityInterface $entity)
 {
   //drupal_register_shutdown_function('_indexing', $entity, 'insert');
+  preIndexing($entity, 'insert');
 
-  // Create a job and add to Advanced Queue
-  $payload = [
-    'data' => $entity,
-    'type' => "insert"
-  ];
-  $job = Job::create('triplestore_indexing_job  ', $payload);
-  if ($job instanceof Job) {
-    $q = Queue::load('triplestore_indexer');
-    $q->enqueueJob($job);
-  }
 }
 
 /**
@@ -68,6 +59,7 @@ function triplestore_indexer_entity_insert(\Drupal\Core\Entity\EntityInterface $
 function triplestore_indexer_entity_update(\Drupal\Core\Entity\EntityInterface $entity)
 {
   //drupal_register_shutdown_function('_indexing', $entity, 'update');
+  preIndexing($entity, 'update');
 }
 
 /**
@@ -78,6 +70,7 @@ function triplestore_indexer_entity_update(\Drupal\Core\Entity\EntityInterface $
 function triplestore_indexer_entity_delete(\Drupal\Core\Entity\EntityInterface $entity)
 {
   //drupal_register_shutdown_function('_indexing', $entity, 'delete');
+  preIndexing($entity, 'delete');
 }
 
 
@@ -105,3 +98,83 @@ if (!function_exists('logging')) {
     echo "</pre>";
   }
 }
+
+
+/**
+ * funcation call embedded after hook_insert,hook_update,hook_delete executed
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ * @param $action
+ */
+function preIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
+{
+  //TODO: check if the entity is content type is selected and triggered event selected
+  $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
+  $triggeredEvents = array_keys(array_filter($config->get('events-to-index')));
+  $indexedContentTypes = array_keys(array_filter($config->get('content-type-to-index')));
+
+  $result = null;
+  switch ($action) {
+    case 'insert':
+    {
+      if (in_array("created", $triggeredEvents) && in_array($entity->bundle(), $indexedContentTypes)) {
+
+        // Create a job and add to Advanced Queue
+        $payload = [
+          'nid' => $entity->id(),
+          'action' => "insert"
+        ];
+        $job = Job::create('triplestore_index_job', $payload);
+        if ($job instanceof Job) {
+          $q = Queue::load('events');
+          $q->enqueueJob($job);
+        }
+
+      }
+      break;
+    }
+    case 'update':
+    {
+      if (in_array("updated", $triggeredEvents) && in_array($entity->getEntityType(), $indexedContentTypes)) {
+
+        // Create a job and add to Advanced Queue
+        $payload = [
+          'nid' => $entity->id(),
+          'entity' => $entity,
+          'action' => "update"
+        ];
+        $job = Job::create('triplestore_index_job', $payload);
+        if ($job instanceof Job) {
+          $q = Queue::load('triplestore_indexing');
+          $q->enqueueJob($job);
+        }
+
+      }
+      break;
+    }
+    case 'delete':
+    {
+      if (in_array("deleted", $triggeredEvents) && in_array($entity->getEntityType(), $indexedContentTypes)) {
+
+        // Create a job and add to Advanced Queue
+        $payload = [
+          'nid' => $entity->id(),
+          'entity' => $entity,
+          'action' => "delete"
+        ];
+        $job = Job::create('triplestore_index_job', $payload);
+        if ($job instanceof Job) {
+          $q = Queue::load('triplestore_indexing');
+          $q->enqueueJob($job);
+        }
+      }
+      break;
+    }
+    default:
+    {
+      break;
+    }
+  }
+}
+
+
