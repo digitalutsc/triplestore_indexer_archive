@@ -87,9 +87,47 @@ class IndexingService implements TripleStoreIndexingInterface
     // TODO: Implement put() method.
   }
 
-  public function delete($jsonld)
+  /**
+   * @param $subject : must be urlencode
+   */
+  public function delete($subject)
   {
-    // TODO: Implement delete() method.
+    $curl = curl_init();
+
+    $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
+    $server = $config->get("server-url");
+    $namespace = $config->get("namespace");
+
+    $opts = array(
+
+      CURLOPT_URL => "$server/namespace/$namespace/sparql?s=". urlencode($subject),
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => '',
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 0,
+      CURLOPT_FOLLOWLOCATION => true,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_CUSTOMREQUEST => 'DELETE',
+      CURLOPT_POSTFIELDS => "",
+      CURLOPT_HTTPHEADER => array(
+        'Content-type: text/plain'
+      ),
+    );
+
+    if ($config->get("method-of-auth") == 'digest') {
+      $opts[CURLOPT_USERPWD] = $config->get('admin-username') . ":" . base64_decode($config->get('admin-password'));
+      $opts[CURLOPT_HTTPAUTH] = CURLAUTH_DIGEST;
+      $opts[CURLOPT_HTTPHEADER] = array(
+        'Content-type: text/plain',
+        'Authorization: Basic'
+      );
+    }
+    curl_setopt_array($curl, $opts);
+
+    $response = curl_exec($curl);
+    curl_close($curl);
+    return $response;
+
   }
 
 

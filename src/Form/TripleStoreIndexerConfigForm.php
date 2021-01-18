@@ -149,7 +149,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
         ->t('Queue:'),
       '#required' => TRUE,
       '#default_value' => ($config->get("advancedqueue-id") !== null) ? $config->get("advancedqueue-id") : "default",
-      '#description' => $this->t('<mark>Please enter <strong>machine name</strong> of the queue. To create or further detail of Advanced Queues, <a href="/admin/config/system/queues">Click here</a></mark>')
+      '#description' => $this->t('<h4>Please enter <u><strong>machine name</strong></u> of the queue. To create or view further detail of Advanced Queues, <a href="/admin/config/system/queues">Click here</a></h4>')
     );
 
     $form['configuration'] = array(
@@ -161,7 +161,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
     $form['events'] = array(
       '#type' => 'details',
       '#title' => $this
-        ->t('Triggered for Events (Nat)'),
+        ->t('When to index:'),
       '#group' => 'configuration',
     );
 
@@ -169,8 +169,8 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       '#type' => 'checkboxes',
       '#title' => t('Set indexing when:'),
       '#options' => array(
-        'created' => t('When Content created'),
-        'updated' => t('When content updated'),
+        'created' => t('When Content created.'),
+        'updated' => t('When content updated.'),
         'deleted' => t('When content deleted.'),
       ),
       '#default_value' => array_keys(array_filter($config->get('events-to-index'))),
