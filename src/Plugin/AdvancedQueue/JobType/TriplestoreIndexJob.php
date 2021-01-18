@@ -20,20 +20,39 @@ class TriplestoreIndexJob extends JobTypeBase
   public function process(Job $job)
   {
     try {
-
+      global $base_url;
       $status = 0;
 
       $payload = $job->getPayload();
       $service = \Drupal::service('triplestore_indexer.indexing');
 
-      $data = $service->serialization($payload['nid']);
-      $response = $service->post($data);
+      switch ($payload['action']) {
+        case "insert": {
+          $data = $service->serialization($payload['nid']);
+          $response = $service->post($data);
+          break;
+        }
+        case "update": {
+          $data = $service->serialization($payload['nid']);
+          $response = $service->post($data);
+          break;
+        }
+        case "delete": {
+          $uri = "<$base_url/node/" . $payload['nid'] . '?_format=jsonld>';
+          $response = $service->delete($uri);
+          break;
+        }
+        default: {
+          return JobResult::failure("No action assigned.");
+        }
+      }
+
       $result = simplexml_load_string($response);
 
       if ($result['modified'] > 0 && $result['milliseconds'] > 0) {
         return JobResult::success('Success. Server response: '. $response);
       }else {
-        return JobResult::success('Failure. Server response: '. $response);
+        return JobResult::failure('Failure. Server response: '. $response);
       }
     } catch (\Exception $e) {
       return JobResult::failure($e->getMessage());

@@ -135,12 +135,11 @@ function preIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
     }
     case 'update':
     {
-      if (in_array("updated", $triggeredEvents) && in_array($entity->getEntityType(), $indexedContentTypes)) {
+      if (in_array("updated", $triggeredEvents) && in_array($entity->bundle(), $indexedContentTypes)) {
 
         // Create a job and add to Advanced Queue
         $payload = [
           'nid' => $entity->id(),
-          'entity' => $entity,
           'action' => "update"
         ];
         $job = Job::create('triplestore_index_job', $payload);
@@ -154,12 +153,10 @@ function preIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
     }
     case 'delete':
     {
-      if (in_array("deleted", $triggeredEvents) && in_array($entity->getEntityType(), $indexedContentTypes)) {
-
+      if (in_array("deleted", $triggeredEvents) && in_array($entity->bundle(), $indexedContentTypes)) {
         // Create a job and add to Advanced Queue
         $payload = [
           'nid' => $entity->id(),
-          'entity' => $entity,
           'action' => "delete"
         ];
         $job = Job::create('triplestore_index_job', $payload);
