@@ -8,6 +8,7 @@
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\advancedqueue\Entity\Queue;
 use Drupal\advancedqueue\Job;
+
 /**
  * Implements hook_help().
  */
@@ -112,16 +113,20 @@ function preIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
   $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
   $triggeredEvents = array_keys(array_filter($config->get('events-to-index')));
   $indexedContentTypes = array_keys(array_filter($config->get('content-type-to-index')));
+  $indexedVocabulary = array_keys(array_filter($config->get('taxonomy-to-index')));
 
   $result = null;
   switch ($action) {
     case 'insert':
     {
-      if (in_array("created", $triggeredEvents) && in_array($entity->bundle(), $indexedContentTypes)) {
+      if (in_array("created", $triggeredEvents)
+        && ($entity->getEntityTypeId() === 'node' && in_array($entity->bundle(), $indexedContentTypes)
+          || ($entity->getEntityTypeId() === 'taxonomy_term' && in_array($entity->bundle(), $indexedVocabulary)))) {
 
         // Create a job and add to Advanced Queue
         $payload = [
           'nid' => $entity->id(),
+          'type' => $entity->getEntityTypeId(),
           'action' => "insert"
         ];
         $job = Job::create('triplestore_index_job', $payload);
@@ -129,17 +134,19 @@ function preIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
           $q = Queue::load($config->get("advancedqueue-id"));
           $q->enqueueJob($job);
         }
-
       }
       break;
     }
     case 'update':
     {
-      if (in_array("updated", $triggeredEvents) && in_array($entity->bundle(), $indexedContentTypes)) {
+      if (in_array("updated", $triggeredEvents)
+        && ($entity->getEntityTypeId() === 'node' && in_array($entity->bundle(), $indexedContentTypes)
+          || ($entity->getEntityTypeId() === 'taxonomy_term' && in_array($entity->bundle(), $indexedVocabulary)))) {
 
         // Create a job and add to Advanced Queue
         $payload = [
           'nid' => $entity->id(),
+          'type' => $entity->getEntityTypeId(),
           'action' => "update"
         ];
         $job = Job::create('triplestore_index_job', $payload);
@@ -147,16 +154,18 @@ function preIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
           $q = Queue::load($config->get("advancedqueue-id"));
           $q->enqueueJob($job);
         }
-
       }
       break;
     }
     case 'delete':
     {
-      if (in_array("deleted", $triggeredEvents) && in_array($entity->bundle(), $indexedContentTypes)) {
+      if (in_array("deleted", $triggeredEvents)
+        && ($entity->getEntityTypeId() === 'node' && in_array($entity->bundle(), $indexedContentTypes)
+          || ($entity->getEntityTypeId() === 'taxonomy_term' && in_array($entity->bundle(), $indexedVocabulary)))) {
         // Create a job and add to Advanced Queue
         $payload = [
           'nid' => $entity->id(),
+          'type' => $entity->getEntityTypeId(),
           'action' => "delete"
         ];
         $job = Job::create('triplestore_index_job', $payload);
