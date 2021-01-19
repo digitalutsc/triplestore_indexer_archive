@@ -142,7 +142,12 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
           $data = $service->serialization($payload);
           $response = $service->post($data);
           // TODO: log the response to status report
-          \Drupal::logger('triplestore_indexer')->info($entity->getEntityTypeId() . " " . "$action: ". $response);
+          $result = simplexml_load_string($response);
+          if ($result['modified'] > 0 && $result['milliseconds'] > 0) {
+            \Drupal::logger('triplestore_indexer')->info($entity->getEntityTypeId() . " ". $entity->id() . " $action: success.");
+          }else {
+            \Drupal::logger('triplestore_indexer')->error($entity->getEntityTypeId() . " ". $entity->id() . " $action: failed.");
+          }
         }
 
       }
@@ -173,7 +178,14 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
           $service = \Drupal::service('triplestore_indexer.indexing');
           $data = $service->serialization($payload);
           $response = $service->put($payload, $data);
-          \Drupal::logger('triplestore_indexer')->info($entity->getEntityTypeId() . " " . "$action: ". $response);
+
+          // Log response
+          $result = simplexml_load_string($response);
+          if ($result['modified'] > 0 && $result['milliseconds'] > 0) {
+            \Drupal::logger('triplestore_indexer')->info($entity->getEntityTypeId() . " ". $entity->id() . " $action: success.");
+          }else {
+            \Drupal::logger('triplestore_indexer')->error($entity->getEntityTypeId() . " ". $entity->id() . " $action: failed.");
+          }
         }
 
       }
@@ -200,7 +212,14 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
         }else {
           $service = \Drupal::service('triplestore_indexer.indexing');
           $response = $service->delete($payload);
-          \Drupal::logger('triplestore_indexer')->info($entity->getEntityTypeId() . " " . "$action: ". $response);
+
+          // log the response
+          $result = simplexml_load_string($response);
+          if ($result['modified'] > 0 && $result['milliseconds'] > 0) {
+            \Drupal::logger('triplestore_indexer')->info($entity->getEntityTypeId() . " ". $entity->id() . " $action: success.");
+          }else {
+            \Drupal::logger('triplestore_indexer')->error($entity->getEntityTypeId() . " ". $entity->id() . " $action: failed.");
+          }
         }
 
       }
