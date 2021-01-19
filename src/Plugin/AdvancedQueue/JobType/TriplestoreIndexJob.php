@@ -9,7 +9,7 @@ use Drupal\advancedqueue\Plugin\AdvancedQueue\JobType\JobTypeBase;
 /**
  * @AdvancedQueueJobType(
  *   id = "triplestore_index_job",
- *   label = @Translation("Single Triplestore Indexing Job"),
+ *   label = @Translation("Triplestore Indexing"),
  * )
  */
 class TriplestoreIndexJob extends JobTypeBase
@@ -29,20 +29,20 @@ class TriplestoreIndexJob extends JobTypeBase
       switch ($payload['action']) {
         case "insert": {
           //for insert
-          $data = $service->serialization($payload['nid']);
+          $data = $service->serialization($payload);
           $response = $service->post($data);
           break;
         }
         case "update": {
           // for update
-          $data = $service->serialization($payload['nid']);
-          $response = $service->put($payload['nid'], $data);
+          $data = $service->serialization($payload);
+          $response = $service->put($payload, $data);
           break;
         }
         case "delete": {
           // for delete
-          $uri = "<$base_url/node/" . $payload['nid'] . '?_format=jsonld>';
-          $response = $service->delete($uri);
+          //$uri = "<$base_url/node/" . $payload['nid'] . '?_format=jsonld>';
+          $response = $service->delete($payload);
           break;
         }
         default: {

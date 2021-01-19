@@ -7,10 +7,10 @@ namespace Drupal\triplestore_indexer;
  */
 interface TripleStoreIndexingInterface {
 
-  public function serialization(\Drupal\Core\Entity\EntityInterface $entity);
-  public function get($jsonld);
-  public function post($data);
-  public function put($nid, $data);
-  public function delete($subject);
+  public function serialization(array $payload);
+  public function get(array $payload);
+  public function post(String $data);
+  public function put(array $payload, $data);
+  public function delete(array $payload);
 
 }

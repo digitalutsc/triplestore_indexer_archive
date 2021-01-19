@@ -18,17 +18,18 @@ class IndexingService implements TripleStoreIndexingInterface
 
 
   /**
-   * @param $nid : node id
-   * @param string $where eg. WHERE {}
+   * @param array $payload
    * @return string
    */
-  public function serialization($nid, string $op = "INSERT DATA", string $where = "")
+  public function serialization(array $payload)
   {
     global $base_url;
+    $nid = $payload['nid'];
+    $type = str_replace("_", "/", $payload['type']);
 
-    //TODO: make GET request to any content with _format=jsonld
+    //make GET request to any content with _format=jsonld
     $client = \Drupal::httpClient();
-    $uri = "$base_url/node/" . $nid . '?_format=jsonld';
+    $uri = "$base_url/$type/$nid" . '?_format=jsonld';
     $request = $client->get($uri);
     $graph = $request->getBody();
 
@@ -36,10 +37,10 @@ class IndexingService implements TripleStoreIndexingInterface
   }
 
   /**
-   *
-   * @param $params
+   * @param $data serialized json-ld
+   * @return bool|string
    */
-  public function post($data)
+  public function post(String $data)
   {
     $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
     $server = $config->get("server-url");
@@ -80,22 +81,27 @@ class IndexingService implements TripleStoreIndexingInterface
   /**
    * @param $jsonld
    */
-  public function get($jsonld)
+  public function get(array $payload)
   {
     // TODO: Implement get() method.
   }
 
   /**
-   * @param $data
+   * @param $nid
+   * @param $data serialized json-ld
    * @return bool|string
    */
-  public function put($nid, $data)
+  public function put(array $payload, $data)
   {
     global $base_url;
-    $uri = "<$base_url/node/" . $nid . '?_format=jsonld>';
+
+    $nid = $payload['nid'];
+    $type = str_replace("_", "/", $payload['type']);
+    $uri = "$base_url/$type/$nid" . '?_format=jsonld';
+
 
     // delete previously triples indexed
-    $deleted = $this->delete($uri);
+    $deleted = $this->delete($payload);
 
     // index with updated content
     if (isset($deleted)) {
@@ -107,8 +113,13 @@ class IndexingService implements TripleStoreIndexingInterface
   /**
    * @param $subject : must be urlencode
    */
-  public function delete($subject)
+  public function delete(array $payload)
   {
+    global $base_url;
+    $nid = $payload['nid'];
+    $type = str_replace("_", "/", $payload['type']);
+    $subject = "<$base_url/$type/$nid" . '?_format=jsonld>';
+
     $curl = curl_init();
 
     $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
