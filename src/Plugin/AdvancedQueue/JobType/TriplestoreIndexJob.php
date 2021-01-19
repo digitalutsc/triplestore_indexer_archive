@@ -28,16 +28,19 @@ class TriplestoreIndexJob extends JobTypeBase
 
       switch ($payload['action']) {
         case "insert": {
+          //for insert
           $data = $service->serialization($payload['nid']);
           $response = $service->post($data);
           break;
         }
         case "update": {
+          // for update
           $data = $service->serialization($payload['nid']);
-          $response = $service->post($data);
+          $response = $service->put($payload['nid'], $data);
           break;
         }
         case "delete": {
+          // for delete
           $uri = "<$base_url/node/" . $payload['nid'] . '?_format=jsonld>';
           $response = $service->delete($uri);
           break;
@@ -50,9 +53,9 @@ class TriplestoreIndexJob extends JobTypeBase
       $result = simplexml_load_string($response);
 
       if ($result['modified'] > 0 && $result['milliseconds'] > 0) {
-        return JobResult::success('Success. Server response: '. $response);
+        return JobResult::success('Server response: '. $response);
       }else {
-        return JobResult::failure('Failure. Server response: '. $response);
+        return JobResult::failure('Server response: '. $response);
       }
     } catch (\Exception $e) {
       return JobResult::failure($e->getMessage());

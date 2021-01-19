@@ -77,14 +77,31 @@ class IndexingService implements TripleStoreIndexingInterface
     return $response;
   }
 
+  /**
+   * @param $jsonld
+   */
   public function get($jsonld)
   {
     // TODO: Implement get() method.
   }
 
-  public function put($jsonld)
+  /**
+   * @param $data
+   * @return bool|string
+   */
+  public function put($nid, $data)
   {
-    // TODO: Implement put() method.
+    global $base_url;
+    $uri = "<$base_url/node/" . $nid . '?_format=jsonld>';
+
+    // delete previously triples indexed
+    $deleted = $this->delete($uri);
+
+    // index with updated content
+    if (isset($deleted)) {
+      $insert = $this->post($data);
+    }
+    return $insert;
   }
 
   /**
