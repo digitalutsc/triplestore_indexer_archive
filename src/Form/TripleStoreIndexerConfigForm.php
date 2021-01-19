@@ -68,12 +68,12 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       '#title' => $this->t('Select method of authentication:'),
       '#options' => [
         '-1' => 'None',
-        'digest' => 'Digest',
-        'oauth' => 'OAuth',
+        'digest' => 'Basic/Digest',
+        //'oauth' => 'OAuth',
       ],
       '#ajax' => [
         'wrapper' => 'questions-fieldset-wrapper',
-        'callback' => '::promptCallback',
+        'callback' => '::promptAuthCallback',
       ],
       '#default_value' => ($config->get("method-of-auth") !== null) ? $config->get("method-of-auth") : ""
     ];
@@ -142,15 +142,62 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       }
     }
 
-    $form['container']['triplestore-server-config']['advancedqueue-id'] = array(
-      '#type' => 'textfield',
-      '#name' => 'advancedqueue-id',
-      '#title' => $this
-        ->t('Queue:'),
-      '#required' => TRUE,
-      '#default_value' => ($config->get("advancedqueue-id") !== null) ? $config->get("advancedqueue-id") : "default",
-      '#description' => $this->t('<h4>Please enter <u><strong>machine name</strong></u> of the queue. To create or view further detail of Advanced Queues, <a href="/admin/config/system/queues">Click here</a></h4>')
-    );
+    $form['container']['triplestore-server-config']['select-op-method'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Select method of operation:'),
+      '#options' => [
+        'action_hooks' => 'Action hooks',
+        'advanced_queue' => 'Advanced Queue (Recommended)',
+      ],
+      '#ajax' => [
+        'wrapper' => 'op-fieldset-wrapper',
+        'callback' => '::promptOpCallback',
+      ],
+      '#default_value' => ($config->get("method-of-op") !== null) ? $config->get("method-of-op") : ""
+    ];
+
+
+
+    $form['container']['triplestore-server-config']['op-config'] = [
+      '#type' => 'details',
+      '#title' => $this->t('How the indexing work?'),
+      '#open' => TRUE,
+      '#attributes' => ['id' => 'op-fieldset-wrapper'],
+    ];
+    $form['container']['triplestore-server-config']['op-config']['description'] = [
+      '#markup' => $this->t('The Indexing operations will be executed right after a node or a taxonomy is created, updated, or deleted .'),
+    ];
+    $operation_type = ($config->get("method-of-op") !== null && !isset($form_state->getValues()['select-op-method'])) ? $config->get("method-of-op") : $form_state->getValues()['select-op-method'];
+    if (!empty($operation_type)) {
+      unset($form['container']['triplestore-server-config']['op-config']['description']);
+      switch ($operation_type) {
+        case "advanced_queue": {
+
+          $form['container']['triplestore-server-config']['op-config']['description'] = [
+            '#markup' => $this->t('<strong>[Highly recommended]</strong> The Indexing operations will be added to a queue, which can be scheduled to run with Cron job or Drupal command. To create or view further detail of Advanced Queues, <a href="/admin/config/system/queues">Click here</a>'),
+          ];
+
+          $form['container']['triplestore-server-config']['op-config']['advancedqueue-id'] = array(
+            '#type' => 'textfield',
+            '#name' => 'advancedqueue-id',
+            '#title' => $this
+              ->t('Queue:'),
+            '#required' => TRUE,
+            '#default_value' => ($config->get("advancedqueue-id") !== null) ? $config->get("advancedqueue-id") : "default",
+            '#description' => $this->t('<strong>Please enter <u><strong>machine name</strong></u> of the queue.</strong>')
+          );
+
+          break;
+        }
+        default: {
+          $form['container']['triplestore-server-config']['op-config']['description'] = [
+            '#markup' => $this->t('The Indexing operations will be executed right after a node or a taxonomy is created, updated, or deleted .'),
+          ];
+          break;
+        }
+      }
+    }
+
 
     $form['configuration'] = array(
       '#type' => 'vertical_tabs',
@@ -245,12 +292,13 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
         t('Your Server URL is not valid, please check it again. <strong>Error message:</strong> '. $e->getMessage()));
     }
 
-
-    // validate if entering a valid machine name of queue
-    $q = Queue::load($form_state->getValues()['advancedqueue-id']);
-    if (!isset($q)) {
-      $form_state->setErrorByName("advancedqueue-id",
-        t('This queue\'s machine name "' . $form_state->getValues()['advancedqueue-id'] . '" is not valid, please verify it by <a href="/admin/config/system/queues">clicking here</a>.'));
+    if($form_state->getValues()['select-op-method'] === 'advanced_queue') {
+      // validate if entering a valid machine name of queue
+      $q = Queue::load($form_state->getValues()['advancedqueue-id']);
+      if (!isset($q)) {
+        $form_state->setErrorByName("advancedqueue-id",
+          t('This queue\'s machine name "' . $form_state->getValues()['advancedqueue-id'] . '" is not valid, please verify it by <a href="/admin/config/system/queues">clicking here</a>.'));
+      }
     }
   }
 
@@ -263,7 +311,8 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
 
     $configFactory->set('server-url', $form_state->getValues()['server-url'])
       ->set('namespace', $form_state->getValues()['namespace'])
-      ->set('method-of-auth', $form_state->getValues()['select-auth-method']);
+      ->set('method-of-auth', $form_state->getValues()['select-auth-method'])
+      ->set('method-of-op', $form_state->getValues()['select-op-method']);
     switch ($form_state->getValues()['select-auth-method']) {
       case 'digest':
       {
@@ -296,8 +345,18 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
         break;
       }
     }
+
+    switch ($form_state->getValues()['select-op-method']) {
+      case "advanced_queue": {
+        $configFactory->set('advancedqueue-id', $form_state->getValues()['advancedqueue-id']);
+        break;
+      }
+      default: {
+        $configFactory->set('advancedqueue-id', "");
+        break;
+      }
+    }
     $configFactory->set('events-to-index', $form_state->getValues()['select-when']);
-    $configFactory->set('advancedqueue-id', $form_state->getValues()['advancedqueue-id']);
     $configFactory->set('content-type-to-index', $form_state->getValues()['select-content-types']);
     $configFactory->set('taxonomy-to-index', $form_state->getValues()['select-vocabulary']);
     $configFactory->save();
@@ -313,9 +372,21 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
    * @param FormStateInterface $form_state
    * @return mixed
    */
-  public function promptCallback(array $form, FormStateInterface $form_state)
+  public function promptAuthCallback(array $form, FormStateInterface $form_state)
   {
     return $form['container']['triplestore-server-config']['auth-config'];
+  }
+
+  /**
+   * For Ajax callback for depending dropdown list
+   *
+   * @param array $form
+   * @param FormStateInterface $form_state
+   * @return mixed
+   */
+  public function promptOpCallback(array $form, FormStateInterface $form_state)
+  {
+    return $form['container']['triplestore-server-config']['op-config'];
   }
 
 }

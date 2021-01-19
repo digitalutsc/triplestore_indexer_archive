@@ -41,7 +41,6 @@ class TriplestoreIndexJob extends JobTypeBase
         }
         case "delete": {
           // for delete
-          //$uri = "<$base_url/node/" . $payload['nid'] . '?_format=jsonld>';
           $response = $service->delete($payload);
           break;
         }
