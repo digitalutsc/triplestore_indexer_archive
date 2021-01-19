@@ -45,8 +45,8 @@ function triplestore_indexer_theme()
  */
 function triplestore_indexer_entity_insert(\Drupal\Core\Entity\EntityInterface $entity)
 {
-  //drupal_register_shutdown_function('_indexing', $entity, 'insert');
-  preIndexing($entity, 'insert');
+  drupal_register_shutdown_function('queueIndexing', $entity, 'insert');
+  //queueIndexing($entity, 'insert');
 
 }
 
@@ -59,8 +59,8 @@ function triplestore_indexer_entity_insert(\Drupal\Core\Entity\EntityInterface $
  */
 function triplestore_indexer_entity_update(\Drupal\Core\Entity\EntityInterface $entity)
 {
-  //drupal_register_shutdown_function('_indexing', $entity, 'update');
-  preIndexing($entity, 'update');
+  drupal_register_shutdown_function('queueIndexing', $entity, 'update');
+  //queueIndexing($entity, 'update');
 }
 
 /**
@@ -70,8 +70,8 @@ function triplestore_indexer_entity_update(\Drupal\Core\Entity\EntityInterface $
  */
 function triplestore_indexer_entity_delete(\Drupal\Core\Entity\EntityInterface $entity)
 {
-  //drupal_register_shutdown_function('_indexing', $entity, 'delete');
-  preIndexing($entity, 'delete');
+  drupal_register_shutdown_function('queueIndexing', $entity, 'delete');
+  //queueIndexing($entity, 'delete');
 }
 
 
@@ -107,7 +107,7 @@ if (!function_exists('logging')) {
  * @param \Drupal\Core\Entity\EntityInterface $entity
  * @param $action
  */
-function preIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
+function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
 {
   //TODO: check if the entity is content type is selected and triggered event selected
   $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
@@ -129,11 +129,22 @@ function preIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
           'type' => $entity->getEntityTypeId(),
           'action' => "insert"
         ];
-        $job = Job::create('triplestore_index_job', $payload);
-        if ($job instanceof Job) {
-          $q = Queue::load($config->get("advancedqueue-id"));
-          $q->enqueueJob($job);
+
+        if ($config->get('method-of-op') === 'advanced_queue') {
+          $job = Job::create('triplestore_index_job', $payload);
+          if ($job instanceof Job) {
+            $q = Queue::load($config->get("advancedqueue-id"));
+            $q->enqueueJob($job);
+          }
         }
+        else {
+          $service = \Drupal::service('triplestore_indexer.indexing');
+          $data = $service->serialization($payload);
+          $response = $service->post($data);
+          // TODO: log the response to status report
+          \Drupal::logger('triplestore_indexer')->info($entity->getEntityTypeId() . " " . "$action: ". $response);
+        }
+
       }
       break;
     }
@@ -149,11 +160,22 @@ function preIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
           'type' => $entity->getEntityTypeId(),
           'action' => "update"
         ];
-        $job = Job::create('triplestore_index_job', $payload);
-        if ($job instanceof Job) {
-          $q = Queue::load($config->get("advancedqueue-id"));
-          $q->enqueueJob($job);
+
+        if ($config->get('method-of-op') === 'advanced_queue') {
+          $job = Job::create('triplestore_index_job', $payload);
+          if ($job instanceof Job) {
+            $q = Queue::load($config->get("advancedqueue-id"));
+            $q->enqueueJob($job);
+          }
         }
+        else {
+          // for update
+          $service = \Drupal::service('triplestore_indexer.indexing');
+          $data = $service->serialization($payload);
+          $response = $service->put($payload, $data);
+          \Drupal::logger('triplestore_indexer')->info($entity->getEntityTypeId() . " " . "$action: ". $response);
+        }
+
       }
       break;
     }
@@ -168,11 +190,19 @@ function preIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
           'type' => $entity->getEntityTypeId(),
           'action' => "delete"
         ];
-        $job = Job::create('triplestore_index_job', $payload);
-        if ($job instanceof Job) {
-          $q = Queue::load($config->get("advancedqueue-id"));
-          $q->enqueueJob($job);
+
+        if ($config->get('method-of-op') === 'advanced_queue') {
+          $job = Job::create('triplestore_index_job', $payload);
+          if ($job instanceof Job) {
+            $q = Queue::load($config->get("advancedqueue-id"));
+            $q->enqueueJob($job);
+          }
+        }else {
+          $service = \Drupal::service('triplestore_indexer.indexing');
+          $response = $service->delete($payload);
+          \Drupal::logger('triplestore_indexer')->info($entity->getEntityTypeId() . " " . "$action: ". $response);
         }
+
       }
       break;
     }
