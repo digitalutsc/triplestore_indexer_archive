@@ -12,8 +12,8 @@ This Drupal 8 or 9's module provide a system to get the Json-LD representation (
 ## Configuration
 
 * Download the module to your Drupal site.
-* Enable the module by Extend > Triplestore Index at http://digital.utsc.localhost/admin/modules or using `drush en triplestore_indexer`.
-* Go to Configuration > System > Triplestore Indexer.
+* Enable the module by **Extend > Custom** or using `drush en triplestore_indexer`.
+* Go to **Configuration > System > Triplestore Indexer**.
 * Fill out the configuration form (please see screenshot below)
   - **Server URL**: Tomcat server URL, eg. http://example.com:8080/blazegraph or http://example.com:8080/bigdata/#splash
   - **Namespace**: see detail at [here](wiki.blazegraph.com/wiki/index.php/GettingStarted#So_how_do_I_put_the_database_in_triple_store_versus_quad_store_mode.3F).
