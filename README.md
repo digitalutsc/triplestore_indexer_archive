@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This Drupal 8 or 9's module provide a system to get the Json-LD representation (which is established from [JSON-LD REST Services module]( https://www.drupal.org/project/jsonld)) of any content type in Drupal and index that into [Blazegraph](https://github.com/blazegraph/database/).
+This Drupal 8 or 9's module provide a system to get the Json-LD representation (which is established from [JSON-LD REST Services module]( https://www.drupal.org/project/jsonld)) of any content type and taxonomy in Drupal and index that into [Blazegraph](https://github.com/blazegraph/database/).
 
 ## Requirement
 
