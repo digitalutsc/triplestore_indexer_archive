@@ -6,7 +6,7 @@ This Drupal 8 or 9's module provide a system to get the Json-LD representation (
 
 ## Requirement
 
-* Tomcat Server: Blazegraph installed as Triplestore. See [the installation guide](https://islandora.github.io/documentation/installation/manual/installing_fedora_syn_and_blazegraph/).
+* Tomcat Server with Blazegraph installed as Triplestore. See [the installation guide](https://islandora.github.io/documentation/installation/manual/installing_fedora_syn_and_blazegraph/).
 * Client: Drupal 8 or 9 website with [JSON-LD REST Services module]( https://www.drupal.org/project/jsonld) and [Advanced Queue](https://www.drupal.org/project/advancedqueue)
 
 ## Configuration
@@ -15,7 +15,7 @@ This Drupal 8 or 9's module provide a system to get the Json-LD representation (
 * Enable the module by **Extend > Custom** or using `drush en triplestore_indexer`.
 * Go to **Configuration > System > Triplestore Indexer**.
 * Fill out the configuration form (please see screenshot below)
-  - **Server URL**: Tomcat server URL, eg. http://example.com:8080/blazegraph or http://example.com:8080/bigdata/#splash
+  - **Server URL**: Blazegraph server URL, eg. http://example.com:8080/blazegraph or http://example.com:8080/bigdata/
   - **Namespace**: see detail at [here](wiki.blazegraph.com/wiki/index.php/GettingStarted#So_how_do_I_put_the_database_in_triple_store_versus_quad_store_mode.3F).
   - **Method of authentication**:
     + **Basic/Digest**: see [the setup guide](http://www.mtitek.com/tutorials/samples/tomcat-digest-auth.php). If your Tomcat server has authentication enabled, enter username and password.
