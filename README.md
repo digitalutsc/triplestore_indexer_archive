@@ -7,8 +7,13 @@ This Drupal 8 or 9's module provide a system to get the Json-LD representation (
 ## Requirement
 
 * **Server side**: a Tomcat Server with Blazegraph installed as Triplestore. See [the installation guide](https://islandora.github.io/documentation/installation/manual/installing_fedora_syn_and_blazegraph/).
-* **Client side**: a Drupal 8 or 9 website with [JSON-LD REST Services module]( https://www.drupal.org/project/jsonld) and [Advanced Queue](https://www.drupal.org/project/advancedqueue)
+* **Client side**: a Drupal 8 or 9 website with required modules: 
+   - [JSON-LD REST Services module]( https://www.drupal.org/project/jsonld)
+   - [Advanced Queue](https://www.drupal.org/project/advancedqueue)
+   - [Rest UI](https://www.drupal.org/project/restui)
 * Setup RDF mapping for your content types and taxonomy `at admin/config/development/configuration`. Please [see the instruction](https://www.drupal.org/docs/8/modules/islandora/user-documentation/rdf-generation).
+* Enable serialization for JSON-LD presentation for content nodes and taxanomy by visit `admin/config/services/rest` or **Configuration > Web Services > REST** (as Screenshot below)
+
 
 ## Configuration
 
@@ -16,6 +21,7 @@ This Drupal 8 or 9's module provide a system to get the Json-LD representation (
 * Enable the module by **Extend > Custom** or using `drush en triplestore_indexer`.
 * Go to **Configuration > System > Triplestore Indexer**.
 * Fill out the configuration form (please see screenshot below)
+
 ![Config Form](https://www.drupal.org/files/project-images/Screen%20Shot%202021-01-19%20at%2010.24.54%20PM.png)
 
   - **Server URL**: Blazegraph server URL, eg. http://example.com:8080/blazegraph or http://example.com:8080/bigdata/
