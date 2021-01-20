@@ -80,7 +80,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
 
     $form['container']['triplestore-server-config']['auth-config'] = [
       '#type' => 'details',
-      '#title' => $this->t('Authentication Infomation:'),
+      '#title' => $this->t('Authentication information:'),
       '#open' => TRUE,
       '#attributes' => ['id' => 'questions-fieldset-wrapper'],
     ];
@@ -146,7 +146,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       '#type' => 'select',
       '#title' => $this->t('Select method of operation:'),
       '#options' => [
-        'action_hooks' => 'Action hooks',
+        'action_hooks' => 'Drupal Entity Hooks',
         'advanced_queue' => 'Advanced Queue (Recommended)',
       ],
       '#ajax' => [
@@ -165,7 +165,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       '#attributes' => ['id' => 'op-fieldset-wrapper'],
     ];
     $form['container']['triplestore-server-config']['op-config']['description'] = [
-      '#markup' => $this->t('The Indexing operations will be executed right after a node or a taxonomy is created, updated, or deleted .'),
+      '#markup' => $this->t('By default this option selected, the indexing will be executed immediately after a node or a taxonomy term is <a target="_blank" href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21entity.api.php/function/hook_entity_insert/9.0.x">created</a>, <a target="_blank" href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21entity.api.php/function/hook_entity_update/9.0.x">updated</a>, or <a target="_blank" href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21entity.api.php/function/hook_entity_delete/9.0.x">deleted</a>. (<strong>WARNING:</strong> it may effect the performance of the site if many nodes/taxonomy terms are being ingested in bulk.)'),
     ];
     $operation_type = ($config->get("method-of-op") !== null && !isset($form_state->getValues()['select-op-method'])) ? $config->get("method-of-op") : $form_state->getValues()['select-op-method'];
     if (!empty($operation_type)) {
@@ -191,7 +191,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
         }
         default: {
           $form['container']['triplestore-server-config']['op-config']['description'] = [
-            '#markup' => $this->t('The Indexing operations will be executed right after a node or a taxonomy is created, updated, or deleted .'),
+            '#markup' => $this->t('By default this option selected, the indexing will be executed immediately after a node or a taxonomy term is <a href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21entity.api.php/function/hook_entity_insert/9.0.x">created</a>, <a href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21entity.api.php/function/hook_entity_update/9.0.x">updated</a>, or <a href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21entity.api.php/function/hook_entity_delete/9.0.x">deleted</a>. (<strong>WARNING:</strong> it may effect the performance of the site if many nodes/taxonomy terms are being ingested in bulk.)'),
           ];
           break;
         }
@@ -216,9 +216,9 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       '#type' => 'checkboxes',
       '#title' => t('Set indexing when:'),
       '#options' => array(
-        'created' => t('When Content created.'),
-        'updated' => t('When content updated.'),
-        'deleted' => t('When content deleted.'),
+        'created' => t('When Content are created.'),
+        'updated' => t('When content are updated.'),
+        'deleted' => t('When content are deleted.'),
       ),
       '#default_value' => array_keys(array_filter($config->get('events-to-index'))),
     );
@@ -352,7 +352,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
         break;
       }
       default: {
-        $configFactory->set('advancedqueue-id', "");
+        $configFactory->set('advancedqueue-id', "default");
         break;
       }
     }
