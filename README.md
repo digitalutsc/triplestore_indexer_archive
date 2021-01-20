@@ -14,6 +14,7 @@ This Drupal 8 or 9's module provide a system to get the Json-LD representation (
 * Setup RDF mapping for your content types and taxonomy `at admin/config/development/configuration`. Please [see the instruction](https://www.drupal.org/docs/8/modules/islandora/user-documentation/rdf-generation).
 * Enable serialization for JSON-LD presentation for content nodes and taxanomy by visit `admin/config/services/rest` or **Configuration > Web Services > REST** (as Screenshot below)
 
+![Rest UI](https://www.drupal.org/files/project-images/Screen%20Shot%202021-01-20%20at%202.54.02%20PM.png)
 
 ## Configuration
 
