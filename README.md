@@ -6,8 +6,9 @@ This Drupal 8 or 9's module provide a system to get the Json-LD representation (
 
 ## Requirement
 
-* Tomcat Server with Blazegraph installed as Triplestore. See [the installation guide](https://islandora.github.io/documentation/installation/manual/installing_fedora_syn_and_blazegraph/).
-* Client: Drupal 8 or 9 website with [JSON-LD REST Services module]( https://www.drupal.org/project/jsonld) and [Advanced Queue](https://www.drupal.org/project/advancedqueue)
+* **Server side**: a Tomcat Server with Blazegraph installed as Triplestore. See [the installation guide](https://islandora.github.io/documentation/installation/manual/installing_fedora_syn_and_blazegraph/).
+* **Client side**: a Drupal 8 or 9 website with [JSON-LD REST Services module]( https://www.drupal.org/project/jsonld) and [Advanced Queue](https://www.drupal.org/project/advancedqueue)
+* Setup RDF mapping for your content types and taxonomy `at admin/config/development/configuration`. Please [see instruction](https://www.drupal.org/docs/8/modules/islandora/user-documentation/rdf-generation)
 
 ## Configuration
 
