@@ -172,9 +172,9 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       unset($form['container']['triplestore-server-config']['op-config']['description']);
       switch ($operation_type) {
         case "advanced_queue": {
-
+          global $base_url;
           $form['container']['triplestore-server-config']['op-config']['description'] = [
-            '#markup' => $this->t('<strong>[Highly recommended]</strong> The Indexing operations will be added to a queue, which can be scheduled to run with Cron job or Drupal command. To create or view further detail of Advanced Queues, <a href="/admin/config/system/queues">Click here</a>'),
+            '#markup' => $this->t('<strong>[Highly recommended]</strong> The Indexing operations will be added to a queue, which can be scheduled to run with <a target="_blank" href="' . $base_url . '/admin/config/system/cron">Cron job</a> or <a target="_blank" href="https://drupalconsole.com/">Drupal Console</a> command (<code>drupal advancedqueue:queue:process default</code>). To create or view further detail of Advanced Queues. <a href="' . $base_url . '/admin/config/system/queues">Click here</a>.'),
           ];
 
           $form['container']['triplestore-server-config']['op-config']['advancedqueue-id'] = array(
@@ -214,9 +214,9 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
 
     $form['events']['select-when'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Set indexing when:'),
+      '#title' => t('Select which event(s) to index:'),
       '#options' => array(
-        'created' => t('When Content are created.'),
+        'created' => t('When content are created.'),
         'updated' => t('When content are updated.'),
         'deleted' => t('When content are deleted.'),
       ),
