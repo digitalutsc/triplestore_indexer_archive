@@ -27,16 +27,11 @@ class JobIndexingEventSubscriber implements \Symfony\Component\EventDispatcher\E
     try {
       $job = $event->getJob();
       $state = $job->getState();
-      $payload = $job->getPayload();
 
       // Don't do anything on a failed or requeued import Job.
       if ($state !== Job::STATE_SUCCESS) {
         return FALSE;
       }
-
-      // Decide whether or not to send a notification.
-      print_log("Success notifying here");
-
     }
     catch(\Exception $e) {
       $logger = \Drupal::service('logger.factory');

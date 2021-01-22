@@ -23,13 +23,13 @@ class IndexingService implements TripleStoreIndexingInterface
    */
   public function serialization(array $payload)
   {
-    global $base_url;
+    $baseurl = \Drupal::request()->getSchemeAndHttpHost();
     $nid = $payload['nid'];
     $type = str_replace("_", "/", $payload['type']);
 
     //make GET request to any content with _format=jsonld
     $client = \Drupal::httpClient();
-    $uri = "$base_url/$type/$nid" . '?_format=jsonld';
+    $uri = "$baseurl/$type/$nid" . '?_format=jsonld';
     $request = $client->get($uri);
     $graph = $request->getBody();
 
@@ -73,7 +73,6 @@ class IndexingService implements TripleStoreIndexingInterface
     curl_setopt_array($curl, $opts);
 
     $response = curl_exec($curl);
-    print_log($response);
     curl_close($curl);
     return $response;
   }
@@ -93,11 +92,11 @@ class IndexingService implements TripleStoreIndexingInterface
    */
   public function put(array $payload, $data)
   {
-    global $base_url;
+    $baseurl = \Drupal::request()->getSchemeAndHttpHost();
 
     $nid = $payload['nid'];
     $type = str_replace("_", "/", $payload['type']);
-    $uri = "$base_url/$type/$nid" . '?_format=jsonld';
+    $uri = "$baseurl/$type/$nid" . '?_format=jsonld';
 
 
     // delete previously triples indexed
@@ -115,10 +114,10 @@ class IndexingService implements TripleStoreIndexingInterface
    */
   public function delete(array $payload)
   {
-    global $base_url;
+    $baseurl = \Drupal::request()->getSchemeAndHttpHost();
     $nid = $payload['nid'];
     $type = str_replace("_", "/", $payload['type']);
-    $subject = "<$base_url/$type/$nid" . '?_format=jsonld>';
+    $subject = "<$baseurl/$type/$nid" . '?_format=jsonld>';
 
     $curl = curl_init();
 
@@ -161,10 +160,10 @@ class IndexingService implements TripleStoreIndexingInterface
 
   public function oldSerialziation(\Drupal\Core\Entity\EntityInterface $entity)
   {
-    global $base_url;
+    $baseurl = \Drupal::request()->getSchemeAndHttpHost();
 
     // get nid from entity
-    $nid = "<$base_url/node/" . $entity->id() . ">";
+    $nid = "<$baseurl/node/" . $entity->id() . ">";
     // get title
     $title = 'dc:title "' . $entity->getTitle() . '"';
     // get body
