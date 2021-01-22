@@ -11,6 +11,6 @@ interface TripleStoreIndexingInterface {
   public function get(array $payload);
   public function post(String $data);
   public function put(array $payload, $data);
-  public function delete(array $payload);
+  public function delete(String $uri);
 
 }
