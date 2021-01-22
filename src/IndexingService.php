@@ -23,13 +23,13 @@ class IndexingService implements TripleStoreIndexingInterface
    */
   public function serialization(array $payload)
   {
-    $baseurl = \Drupal::request()->getSchemeAndHttpHost();
+    global $base_url;
     $nid = $payload['nid'];
     $type = str_replace("_", "/", $payload['type']);
 
     //make GET request to any content with _format=jsonld
     $client = \Drupal::httpClient();
-    $uri = "$baseurl/$type/$nid" . '?_format=jsonld';
+    $uri = "$base_url/$type/$nid" . '?_format=jsonld';
     $request = $client->get($uri);
     $graph = $request->getBody();
 
@@ -92,11 +92,11 @@ class IndexingService implements TripleStoreIndexingInterface
    */
   public function put(array $payload, $data)
   {
-    $baseurl = \Drupal::request()->getSchemeAndHttpHost();
+    global $base_url;
 
     $nid = $payload['nid'];
     $type = str_replace("_", "/", $payload['type']);
-    $uri = "$baseurl/$type/$nid" . '?_format=jsonld';
+    $uri = "$base_url/$type/$nid" . '?_format=jsonld';
 
 
     // delete previously triples indexed
@@ -114,10 +114,10 @@ class IndexingService implements TripleStoreIndexingInterface
    */
   public function delete(array $payload)
   {
-    $baseurl = \Drupal::request()->getSchemeAndHttpHost();
+    global $base_url;
     $nid = $payload['nid'];
     $type = str_replace("_", "/", $payload['type']);
-    $subject = "<$baseurl/$type/$nid" . '?_format=jsonld>';
+    $subject = "<$base_url/$type/$nid" . '?_format=jsonld>';
 
     $curl = curl_init();
 
@@ -160,10 +160,10 @@ class IndexingService implements TripleStoreIndexingInterface
 
   public function oldSerialziation(\Drupal\Core\Entity\EntityInterface $entity)
   {
-    $baseurl = \Drupal::request()->getSchemeAndHttpHost();
+    global $base_url;
 
     // get nid from entity
-    $nid = "<$baseurl/node/" . $entity->id() . ">";
+    $nid = "<$base_url/node/" . $entity->id() . ">";
     // get title
     $title = 'dc:title "' . $entity->getTitle() . '"';
     // get body
