@@ -31,25 +31,36 @@ class TriplestoreIndexJob extends JobTypeBase
           //for insert
           $data = $service->serialization($payload);
           $response = $service->post($data);
+          $result = simplexml_load_string($response);
           break;
         }
         case "update": {
           // for update
           $data = $service->serialization($payload);
           $response = $service->put($payload, $data);
+          $result = simplexml_load_string($response);
           break;
         }
         case "delete": {
           // for delete
-          $response = $service->delete($payload);
+          $nid = $payload['nid'];
+          $type = str_replace("_", "/", $payload['type']);
+
+          $urijld = "<$base_url/$type/$nid" . '?_format=jsonld>';
+          $response = $service->delete($urijld);
+          $result = simplexml_load_string($response);
+
+          if ($result['modified'] <= 0) {
+            $uri = "<$base_url/$type/$nid" . '>';
+            $response = $service->delete($uri);
+            $result = simplexml_load_string($response);
+          }
           break;
         }
         default: {
           return JobResult::failure("No action assigned.");
         }
       }
-
-      $result = simplexml_load_string($response);
 
       if ($result['modified'] > 0 && $result['milliseconds'] > 0) {
         return JobResult::success('Server response: '. $response);

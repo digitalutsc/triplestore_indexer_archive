@@ -100,7 +100,7 @@ class IndexingService implements TripleStoreIndexingInterface
 
 
     // delete previously triples indexed
-    $deleted = $this->delete($payload);
+    $deleted = $this->delete($uri);
 
     // index with updated content
     if (isset($deleted)) {
@@ -112,13 +112,8 @@ class IndexingService implements TripleStoreIndexingInterface
   /**
    * @param $subject : must be urlencode
    */
-  public function delete(array $payload)
+  public function delete(String $uri)
   {
-    global $base_url;
-    $nid = $payload['nid'];
-    $type = str_replace("_", "/", $payload['type']);
-    $subject = "<$base_url/$type/$nid" . '?_format=jsonld>';
-
     $curl = curl_init();
 
     $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
@@ -127,7 +122,7 @@ class IndexingService implements TripleStoreIndexingInterface
 
     $opts = array(
 
-      CURLOPT_URL => "$server/namespace/$namespace/sparql?s=". urlencode($subject),
+      CURLOPT_URL => "$server/namespace/$namespace/sparql?s=". urlencode($uri),
       CURLOPT_RETURNTRANSFER => true,
       CURLOPT_ENCODING => '',
       CURLOPT_MAXREDIRS => 10,

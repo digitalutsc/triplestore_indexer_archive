@@ -197,21 +197,29 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
         && ($entity->getEntityTypeId() === 'node' && in_array($entity->bundle(), $indexedContentTypes)
           || ($entity->getEntityTypeId() === 'taxonomy_term' && in_array($entity->bundle(), $indexedVocabulary)))) {
         // Create a job and add to Advanced Queue
-        $payload = [
-          'nid' => $entity->id(),
-          'type' => $entity->getEntityTypeId(),
-          'action' => "delete"
-        ];
-
         if ($config->get('method-of-op') === 'advanced_queue') {
+          $payload = [
+            'nid' => $entity->id(),
+            'type' => $entity->getEntityTypeId(),
+            'action' => "delete"
+          ];
           $job = Job::create('triplestore_index_job', $payload);
           if ($job instanceof Job) {
             $q = Queue::load($config->get("advancedqueue-id"));
             $q->enqueueJob($job);
           }
         }else {
+          global $base_url;
           $service = \Drupal::service('triplestore_indexer.indexing');
-          $response = $service->delete($payload);
+          $urijld = "<$base_url/".$entity->getEntityTypeId()."/".$entity->id() . '?_format=jsonld>';
+          $response = $service->delete($urijld);
+
+          // check ?s may be insert with uri with ?_format=jsonld
+          $result = simplexml_load_string($response);
+          if ($result['modified'] <= 0) {
+            $uri = "<$base_url/".$entity->getEntityTypeId()."/".$entity->id() . '>';
+            $response = $service->delete($uri);
+          }
 
           // log the response
           $result = simplexml_load_string($response);
