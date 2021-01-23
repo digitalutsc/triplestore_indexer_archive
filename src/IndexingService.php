@@ -96,14 +96,20 @@ class IndexingService implements TripleStoreIndexingInterface
 
     $nid = $payload['nid'];
     $type = str_replace("_", "/", $payload['type']);
-    $uri = "$base_url/$type/$nid" . '?_format=jsonld';
-
 
     // delete previously triples indexed
-    $deleted = $this->delete($uri);
+    $urijld = "<$base_url/$type/$nid" . '?_format=jsonld>';
+    $response = $this->delete($urijld);
+
+    // check ?s may be insert with uri with ?_format=jsonld
+    $result = simplexml_load_string($response);
+    if ($result['modified'] <= 0) {
+      $uri = "<$base_url/$type/$nid>";
+      $response = $this->delete($uri);
+    }
 
     // index with updated content
-    if (isset($deleted)) {
+    if (isset($response)) {
       $insert = $this->post($data);
     }
     return $insert;
