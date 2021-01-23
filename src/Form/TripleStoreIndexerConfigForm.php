@@ -53,7 +53,8 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       '#title' => $this
         ->t('Server URL:'),
       '#required' => TRUE,
-      '#default_value' => ($config->get("server-url") !== null) ? $config->get("server-url") : ""
+      '#default_value' => ($config->get("server-url") !== null) ? $config->get("server-url") : "",
+      '#description' => $this->t('eg. http://localhost:8080/bigdata OR http://localhost:8080/blazegraph')
     );
     $form['container']['triplestore-server-config']['namespace'] = array(
       '#type' => 'textfield',

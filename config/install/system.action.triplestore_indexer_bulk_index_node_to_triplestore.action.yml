@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - triplestore_indexer
+id: triplestore_indexer_bulk_index_node_to_triplestore
+label: 'Bulk Index node to Triplestore (by triplestore_indexer module)'
+type: node
+plugin: triplestore_indexer_bulk_index_node_to_triplestore
