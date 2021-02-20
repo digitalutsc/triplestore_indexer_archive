@@ -55,6 +55,15 @@ class TriplestoreIndexJob extends JobTypeBase
             $response = $service->delete($uri);
             $result = simplexml_load_string($response);
           }
+
+          // delete terms and author associated with the deleting node
+          if (is_array($payload['others'])) {
+            foreach ($payload['others'] as $ouri) {
+              if (isset($ouri))
+                $response = $service->delete("<$ouri>");
+            }
+          }
+
           break;
         }
         default: {

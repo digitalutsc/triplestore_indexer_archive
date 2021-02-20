@@ -33,7 +33,32 @@ class IndexingService implements TripleStoreIndexingInterface
     $request = $client->get($uri);
     $graph = $request->getBody();
 
-    return "$graph ";
+    return $graph;
+  }
+
+  /**
+   * @param array $payload
+   * @return string
+   */
+  public function getOtherConmponentAssocNode(array $payload)
+  {
+    global $base_url;
+    $nid = $payload['nid'];
+    $type = str_replace("_", "/", $payload['type']);
+
+    //make GET request to any content with _format=jsonld
+    $client = \Drupal::httpClient();
+    $uri = "$base_url/$type/$nid" . '?_format=jsonld';
+    $request = $client->get($uri);
+    $graph = ((array)json_decode($request->getBody()))['@graph'];
+
+    $others = [];
+    for($i = 1; $i < count($graph); $i ++) {
+      $component = (array)$graph[$i];
+      array_push($others, $component['@id']);
+    }
+
+    return $others;
   }
 
   /**

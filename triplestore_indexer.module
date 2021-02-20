@@ -70,8 +70,8 @@ function triplestore_indexer_entity_update(\Drupal\Core\Entity\EntityInterface $
  */
 function triplestore_indexer_entity_delete(\Drupal\Core\Entity\EntityInterface $entity)
 {
-  drupal_register_shutdown_function('queueIndexing', $entity, 'delete');
-  //queueIndexing($entity, 'delete');
+  //drupal_register_shutdown_function('queueIndexing', $entity, 'delete');
+  queueIndexing($entity, 'delete');
 }
 
 
@@ -196,13 +196,22 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
       if (in_array("deleted", $triggeredEvents)
         && ($entity->getEntityTypeId() === 'node' && in_array($entity->bundle(), $indexedContentTypes)
           || ($entity->getEntityTypeId() === 'taxonomy_term' && in_array($entity->bundle(), $indexedVocabulary)))) {
+
+        // get @id of other components (eg. terms, media file) associated with node
+        $payload = [
+          'nid' => $entity->id(),
+          'type' => $entity->getEntityTypeId(),
+          'action' => "delete"
+        ];
+        $service = \Drupal::service('triplestore_indexer.indexing');
+        $others = $service->getOtherConmponentAssocNode($payload);
+
         // Create a job and add to Advanced Queue
         if ($config->get('method-of-op') === 'advanced_queue') {
-          $payload = [
-            'nid' => $entity->id(),
-            'type' => $entity->getEntityTypeId(),
-            'action' => "delete"
-          ];
+          if (is_array($others) && count($others) > 0) {
+            $payload['others'] = $others;
+          }
+
           $job = Job::create('triplestore_index_job', $payload);
           if ($job instanceof Job) {
             $q = Queue::load($config->get("advancedqueue-id"));
@@ -219,6 +228,14 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
           if ($result['modified'] <= 0) {
             $uri = "<$base_url/".$entity->getEntityTypeId()."/".$entity->id() . '>';
             $response = $service->delete($uri);
+
+            // delete terms and author associated with the deleting node
+            if (is_array($others) && count($others) > 0) {
+              foreach ($others as $ouri) {
+                if (isset($ouri))
+                  $response = $service->delete("<$ouri>");
+              }
+            }
           }
 
           // log the response

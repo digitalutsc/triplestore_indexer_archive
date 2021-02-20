@@ -36,6 +36,10 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
    */
   public function buildForm(array $form, FormStateInterface $form_state)
   {
+    $service = \Drupal::service('triplestore_indexer.indexing');
+    $data = $service->delete("http://drupal9.localhost/sites/default/files/2021-02/generateImage_3ecLTb.gif");
+
+
     $config = $this->config('triplestore_indexer.triplestoreindexerconfig');
 
     $form['container'] = array(
@@ -147,14 +151,14 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       '#type' => 'select',
       '#title' => $this->t('Select method of operation:'),
       '#options' => [
-        'action_hooks' => 'Drupal Entity Hooks',
         'advanced_queue' => 'Advanced Queue (Recommended)',
+        'action_hooks' => 'Drupal Entity Hooks',
       ],
       '#ajax' => [
         'wrapper' => 'op-fieldset-wrapper',
         'callback' => '::promptOpCallback',
       ],
-      '#default_value' => ($config->get("method-of-op") !== null) ? $config->get("method-of-op") : ""
+      '#default_value' => ($config->get("method-of-op") !== null) ? $config->get("method-of-op") : "advanced_queue"
     ];
 
 
