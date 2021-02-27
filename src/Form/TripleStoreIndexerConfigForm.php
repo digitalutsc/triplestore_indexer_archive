@@ -36,10 +36,6 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
    */
   public function buildForm(array $form, FormStateInterface $form_state)
   {
-    $service = \Drupal::service('triplestore_indexer.indexing');
-    $data = $service->delete("http://drupal9.localhost/sites/default/files/2021-02/generateImage_3ecLTb.gif");
-
-
     $config = $this->config('triplestore_indexer.triplestoreindexerconfig');
 
     $form['container'] = array(

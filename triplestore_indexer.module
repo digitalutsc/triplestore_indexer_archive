@@ -232,8 +232,11 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
             // delete terms and author associated with the deleting node
             if (is_array($others) && count($others) > 0) {
               foreach ($others as $ouri) {
-                if (isset($ouri))
+                if (isset($ouri)) {
+                  //TODO: check if this compoent is set to be allowed to delete in config form.
                   $response = $service->delete("<$ouri>");
+                }
+
               }
             }
           }
@@ -255,6 +258,22 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
       break;
     }
   }
+}
+
+/**
+ * get Term ID out of serialized URI
+ *
+ * @param String $uri
+ * @return string|string[]
+ */
+function getTermIDfromURI(String $uri) {
+  global $base_url;
+  return str_replace("?_format=jsonld","",  str_replace($base_url."/taxonomy/term/", "", $uri));
+}
+
+function getVocabularyFromTermID(int $term_id) {
+  $term = \Drupal\taxonomy\Entity\Term::load($term_id);
+  return $term->bundle();
 }
 
 

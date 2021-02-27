@@ -52,10 +52,17 @@ class IndexingService implements TripleStoreIndexingInterface
     $request = $client->get($uri);
     $graph = ((array)json_decode($request->getBody()))['@graph'];
 
+    $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
+    $indexedContentTypes = array_keys(array_filter($config->get('content-type-to-index')));
     $others = [];
     for($i = 1; $i < count($graph); $i ++) {
       $component = (array)$graph[$i];
-      array_push($others, $component['@id']);
+
+      //check if this component is set to be allowed to delete in config form.
+      $vocal = getVocabularyFromTermID(getTermIDfromURI($component['@id']));
+      if (isset($vocal) && in_array($vocal, $indexedContentTypes)) {
+        array_push($others, $component['@id']);
+      }
     }
 
     return $others;
@@ -181,40 +188,6 @@ class IndexingService implements TripleStoreIndexingInterface
     curl_close($curl);
     return $response;
 
-  }
-
-
-  public function oldSerialziation(\Drupal\Core\Entity\EntityInterface $entity)
-  {
-    global $base_url;
-
-    // get nid from entity
-    $nid = "<$base_url/node/" . $entity->id() . ">";
-    // get title
-    $title = 'dc:title "' . $entity->getTitle() . '"';
-    // get body
-    $body = 'dc:description "' . trim(preg_replace('/\s+/', ' ', strip_tags($entity->get('body')->getValue()[0]['value']))) . '"';
-
-    $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
-
-    // get author
-    $node = \Drupal::entityTypeManager()->getStorage('node')->load($entity->id());
-
-    // get author
-    $owner = $node->getOwner()->getDisplayName();
-    $author = 'dc:creator "' . $owner . '"';
-
-    // get node type
-    $type = 'dc:type "' . $entity->bundle() . '"';
-
-    // get created time
-    $published_at = 'dc:date "' . date("F j, Y, g:i a", $node->getCreatedTime()) . '"';
-
-    $data = "$nid $title; $body; $type; $author; $published_at";
-
-    $params = "update=PREFIX  dc: <http://purl.org/dc/elements/1.1/> INSERT DATA { $data }";
-
-    return $params;
   }
 
 }
