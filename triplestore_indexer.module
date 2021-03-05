@@ -70,8 +70,8 @@ function triplestore_indexer_entity_update(\Drupal\Core\Entity\EntityInterface $
  */
 function triplestore_indexer_entity_delete(\Drupal\Core\Entity\EntityInterface $entity)
 {
-  drupal_register_shutdown_function('queueIndexing', $entity, 'delete');
-  //queueIndexing($entity, 'delete');
+  //drupal_register_shutdown_function('queueIndexing', $entity, 'delete');
+  queueIndexing($entity, 'delete');
 }
 
 
@@ -111,9 +111,15 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
 {
   //TODO: check if the entity is content type is selected and triggered event selected
   $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
-  $triggeredEvents = array_keys(array_filter($config->get('events-to-index')));
-  $indexedContentTypes = array_keys(array_filter($config->get('content-type-to-index')));
-  $indexedVocabulary = array_keys(array_filter($config->get('taxonomy-to-index')));
+
+  // fix warning when Config form hasn't been setup
+  if (!isset($config)) {
+    return;
+  }
+
+  $triggeredEvents = (is_array($config->get('events-to-index'))) ?  array_keys(array_filter($config->get('events-to-index'))) : [];
+  $indexedContentTypes = (is_array($config->get('content-type-to-index'))) ? array_keys(array_filter($config->get('content-type-to-index'))) : [];
+  $indexedVocabulary = (is_array($config->get('content-type-to-index')))  ? array_keys(array_filter($config->get('taxonomy-to-index'))) : [];
 
   $result = null;
   switch ($action) {
@@ -196,13 +202,22 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
       if (in_array("deleted", $triggeredEvents)
         && ($entity->getEntityTypeId() === 'node' && in_array($entity->bundle(), $indexedContentTypes)
           || ($entity->getEntityTypeId() === 'taxonomy_term' && in_array($entity->bundle(), $indexedVocabulary)))) {
+
+        // get @id of other components (eg. terms, media file) associated with node
+        $payload = [
+          'nid' => $entity->id(),
+          'type' => $entity->getEntityTypeId(),
+          'action' => "delete"
+        ];
+        $service = \Drupal::service('triplestore_indexer.indexing');
+        $others = $service->getOtherConmponentAssocNode($payload);
+
         // Create a job and add to Advanced Queue
         if ($config->get('method-of-op') === 'advanced_queue') {
-          $payload = [
-            'nid' => $entity->id(),
-            'type' => $entity->getEntityTypeId(),
-            'action' => "delete"
-          ];
+          if (is_array($others) && count($others) > 0) {
+            $payload['others'] = $others;
+          }
+
           $job = Job::create('triplestore_index_job', $payload);
           if ($job instanceof Job) {
             $q = Queue::load($config->get("advancedqueue-id"));
@@ -219,6 +234,17 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
           if ($result['modified'] <= 0) {
             $uri = "<$base_url/".$entity->getEntityTypeId()."/".$entity->id() . '>';
             $response = $service->delete($uri);
+
+            // delete terms and author associated with the deleting node
+            if (is_array($others) && count($others) > 0) {
+              foreach ($others as $ouri) {
+                if (isset($ouri)) {
+                  //TODO: check if this compoent is set to be allowed to delete in config form.
+                  $response = $service->delete("<$ouri>");
+                }
+
+              }
+            }
           }
 
           // log the response
@@ -238,6 +264,22 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
       break;
     }
   }
+}
+
+/**
+ * get Term ID out of serialized URI
+ *
+ * @param String $uri
+ * @return string|string[]
+ */
+function getTermIDfromURI(String $uri) {
+  global $base_url;
+  return str_replace("?_format=jsonld","",  str_replace($base_url."/taxonomy/term/", "", $uri));
+}
+
+function getVocabularyFromTermID(int $term_id) {
+  $term = \Drupal\taxonomy\Entity\Term::load($term_id);
+  return $term->bundle();
 }
 
 
