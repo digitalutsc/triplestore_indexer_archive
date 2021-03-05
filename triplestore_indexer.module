@@ -117,9 +117,9 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
     return;
   }
 
-  $triggeredEvents = array_keys(array_filter($config->get('events-to-index')));
-  $indexedContentTypes = array_keys(array_filter($config->get('content-type-to-index')));
-  $indexedVocabulary = array_keys(array_filter($config->get('taxonomy-to-index')));
+  $triggeredEvents = (is_array($config->get('events-to-index'))) ?  array_keys(array_filter($config->get('events-to-index'))) : [];
+  $indexedContentTypes = (is_array($config->get('content-type-to-index'))) ? array_keys(array_filter($config->get('content-type-to-index'))) : [];
+  $indexedVocabulary = (is_array($config->get('content-type-to-index')))  ? array_keys(array_filter($config->get('taxonomy-to-index'))) : [];
 
   $result = null;
   switch ($action) {

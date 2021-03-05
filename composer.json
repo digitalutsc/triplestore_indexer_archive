@@ -8,6 +8,6 @@
     "minimum-stability": "dev",
     "support": {
         "issues": "https://www.drupal.org/project/issues/triplestore_indexer",
-        "source": "http://cgit.drupalcode.org/triplestore_indexer",
-    },
+        "source": "http://cgit.drupalcode.org/triplestore_indexer"
+    }
 }
