@@ -111,6 +111,12 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
 {
   //TODO: check if the entity is content type is selected and triggered event selected
   $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
+
+  // fix warning when Config form hasn't been setup
+  if (!isset($config)) {
+    return;
+  }
+
   $triggeredEvents = array_keys(array_filter($config->get('events-to-index')));
   $indexedContentTypes = array_keys(array_filter($config->get('content-type-to-index')));
   $indexedVocabulary = array_keys(array_filter($config->get('taxonomy-to-index')));
