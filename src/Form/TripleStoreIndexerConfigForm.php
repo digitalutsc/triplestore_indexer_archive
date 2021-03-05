@@ -157,8 +157,6 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       '#default_value' => ($config->get("method-of-op") !== null) ? $config->get("method-of-op") : "advanced_queue"
     ];
 
-
-
     $form['container']['triplestore-server-config']['op-config'] = [
       '#type' => 'details',
       '#title' => $this->t('How the indexing work?'),
@@ -169,6 +167,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       '#markup' => $this->t('By default this option selected, the indexing will be executed immediately after a node or a taxonomy term is <a target="_blank" href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21entity.api.php/function/hook_entity_insert/9.0.x">created</a>, <a target="_blank" href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21entity.api.php/function/hook_entity_update/9.0.x">updated</a>, or <a target="_blank" href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21entity.api.php/function/hook_entity_delete/9.0.x">deleted</a>. (<strong>WARNING:</strong> it may effect the performance of the site if many nodes/taxonomy terms are being ingested in bulk.)'),
     ];
     $operation_type = ($config->get("method-of-op") !== null && !isset($form_state->getValues()['select-op-method'])) ? $config->get("method-of-op") : $form_state->getValues()['select-op-method'];
+    $operation_type = (empty($operation_type)) ?  "advanced_queue" : $operation_type;
     if (!empty($operation_type)) {
       unset($form['container']['triplestore-server-config']['op-config']['description']);
       switch ($operation_type) {
@@ -178,14 +177,15 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
             '#markup' => $this->t('<strong>[Highly recommended]</strong> The Indexing operations will be added to a queue, which can be scheduled to run with <a target="_blank" href="' . $base_url . '/admin/config/system/cron">Cron job</a> or <a target="_blank" href="https://drupalconsole.com/">Drupal Console</a> command (<code>drupal advancedqueue:queue:process default</code>). To create or view further detail of Advanced Queues. <a href="' . $base_url . '/admin/config/system/queues">Click here</a>.'),
           ];
 
+          $queues = \Drupal::entityQuery('advancedqueue_queue')->execute();
           $form['container']['triplestore-server-config']['op-config']['advancedqueue-id'] = array(
-            '#type' => 'textfield',
+            '#type' => 'select',
             '#name' => 'advancedqueue-id',
-            '#title' => $this
-              ->t('Queue:'),
+            '#title' => $this->t('Queue:'),
             '#required' => TRUE,
+            '#default_value' => 1,
+            '#options' => $queues,
             '#default_value' => ($config->get("advancedqueue-id") !== null) ? $config->get("advancedqueue-id") : "default",
-            '#description' => $this->t('<strong>Please enter <u><strong>machine name</strong></u> of the queue.</strong>')
           );
 
           break;
