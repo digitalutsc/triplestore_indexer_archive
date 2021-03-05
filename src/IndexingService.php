@@ -37,6 +37,7 @@ class IndexingService implements TripleStoreIndexingInterface
   }
 
   /**
+   * Load other data associated with a node s.t author, taxonomy terms
    * @param array $payload
    * @return string
    */
@@ -58,11 +59,18 @@ class IndexingService implements TripleStoreIndexingInterface
     for($i = 1; $i < count($graph); $i ++) {
       $component = (array)$graph[$i];
 
-      //check if this component is set to be allowed to delete in config form.
-      $vocal = getVocabularyFromTermID(getTermIDfromURI($component['@id']));
-      if (isset($vocal) && in_array($vocal, $indexedContentTypes)) {
+      if (strpos($component['@id'], '/taxonomy/term/') !== false) {
+        //check if this component is taxonomy, check with saved config if a term is set to be delete
+        $vocal = getVocabularyFromTermID(getTermIDfromURI($component['@id']));
+        $indexedVocabulary =  array_keys(array_filter($config->get('taxonomy-to-index')));
+        if (isset($vocal) && in_array($vocal, $indexedVocabulary)) {
+          array_push($others, $component['@id']);
+        }
+      }
+      else {
         array_push($others, $component['@id']);
       }
+
     }
 
     return $others;

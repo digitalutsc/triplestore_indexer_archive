@@ -174,19 +174,22 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
         case "advanced_queue": {
           global $base_url;
           $form['container']['triplestore-server-config']['op-config']['description'] = [
-            '#markup' => $this->t('<strong>[Highly recommended]</strong> The Indexing operations will be added to a queue, which can be scheduled to run with <a target="_blank" href="' . $base_url . '/admin/config/system/cron">Cron job</a> or <a target="_blank" href="https://drupalconsole.com/">Drupal Console</a> command (<code>drupal advancedqueue:queue:process default</code>). To create or view further detail of Advanced Queues. <a href="' . $base_url . '/admin/config/system/queues">Click here</a>.'),
+            '#markup' => $this->t('<strong>[Highly recommended]</strong> The Indexing operations will be added to a queue, which can be scheduled to run with <a target="_blank" href="' . $base_url . '/admin/config/system/cron">Cron job</a> or <a target="_blank" href="https://drupalconsole.com/">Drupal Console</a> command (<code>drupal advancedqueue:queue:process default</code>).'),
           ];
 
           $queues = \Drupal::entityQuery('advancedqueue_queue')->execute();
           $form['container']['triplestore-server-config']['op-config']['advancedqueue-id'] = array(
             '#type' => 'select',
             '#name' => 'advancedqueue-id',
-            '#title' => $this->t('Queue:'),
+            '#title' => $this->t('Available queues:'),
             '#required' => TRUE,
             '#default_value' => 1,
             '#options' => $queues,
             '#default_value' => ($config->get("advancedqueue-id") !== null) ? $config->get("advancedqueue-id") : "default",
           );
+          $form['container']['triplestore-server-config']['op-config']['link-to-add-queue'] = [
+            '#markup' => $this->t('To create a new queue, <a href="/admin/config/system/queues/add" target="_blank">Click here</a>'),
+          ];
 
           break;
         }
