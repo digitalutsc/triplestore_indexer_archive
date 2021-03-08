@@ -141,6 +141,16 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
           if ($job instanceof Job) {
             $q = Queue::load($config->get("advancedqueue-id"));
             $q->enqueueJob($job);
+
+            // auto run the queue
+            if ($config->get("autorun-queue") === 1) {
+
+              //TODO: Run the cron by curl.
+              global $base_url;
+              $cmd = "drush --uri=".$base_url." advancedqueue:queue:process " . $config->get("advancedqueue-id") . " 2>&1";
+              $output = drush_invoke("advancedqueue:queue:process",  [$config->get("advancedqueue-id") . " 2>&1"]);
+              print_log($output);
+            }
           }
         }
         else {

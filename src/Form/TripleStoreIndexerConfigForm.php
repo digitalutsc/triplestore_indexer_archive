@@ -187,10 +187,17 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
             '#options' => $queues,
             '#default_value' => ($config->get("advancedqueue-id") !== null) ? $config->get("advancedqueue-id") : "default",
           );
-          $form['container']['triplestore-server-config']['op-config']['link-to-add-queue'] = [
-            '#markup' => $this->t('To create a new queue, <a href="/admin/config/system/queues/add" target="_blank">Click here</a>'),
+
+          $form['container']['triplestore-server-config']['op-config']['autorun-queue'] = [
+            '#type' => 'checkbox',
+            '#name' => 'autorun-queue',
+            '#title' => $this->t("Run the queue automatically."),
+            '#default_value' => ($config->get("autorun-queue") !== null) ? $config->get("autorun-queue") : 0,
           ];
 
+          $form['container']['triplestore-server-config']['op-config']['link-to-add-queue'] = [
+            '#markup' => $this->t('<p>View jobs of this queue <u>'.$config->get("advancedqueue-id").'</u>, <a href="/admin/config/system/queues/jobs/'.$config->get("advancedqueue-id").'" target="_blank">Click here</a><br />To create a new queue, <a href="/admin/config/system/queues/add" target="_blank">Click here</a></p>'),
+          ];
           break;
         }
         default: {
@@ -363,6 +370,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
     $configFactory->set('events-to-index', $form_state->getValues()['select-when']);
     $configFactory->set('content-type-to-index', $form_state->getValues()['select-content-types']);
     $configFactory->set('taxonomy-to-index', $form_state->getValues()['select-vocabulary']);
+    $configFactory->set('autorun-queue', $form_state->getValues()['autorun-queue']);
     $configFactory->save();
 
     parent::submitForm($form, $form_state);

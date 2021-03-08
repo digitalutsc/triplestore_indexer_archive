@@ -24,10 +24,8 @@ class IndexedSubscriber implements EventSubscriberInterface
    */
   public static function getSubscribedEvents()
   {
-    error_log(print_r(getSubscribedEvents, true), 0);
     $events['advancedqueue.post_process'] = ['onPostRespond'];
     $events['advancedqueue.pre_process'] = ['onPreRespond'];
-
     return $events;
   }
 
@@ -39,8 +37,7 @@ class IndexedSubscriber implements EventSubscriberInterface
    */
   public function onPostRespond(Event $event)
   {
-    error_log(print_r("onPostRespond", true), 0);
-    \Drupal::messenger()->addMessage('Event advancedqueue.post_process thrown by Subscriber in module triplestore_indexer.', 'status', TRUE);
+    //\Drupal::messenger()->addMessage('Event advancedqueue.post_process thrown by Subscriber in module triplestore_indexer.', 'status', TRUE);
   }
 
   /**
@@ -51,8 +48,7 @@ class IndexedSubscriber implements EventSubscriberInterface
    */
   public function onPreRespond(Event $event)
   {
-    error_log(print_r("onPreRespond", true), 0);
-    \Drupal::messenger()->addMessage('Event advancedqueue.pre_process thrown by Subscriber in module triplestore_indexer.', 'status', TRUE);
+    //\Drupal::messenger()->addMessage('Event advancedqueue.pre_process thrown by Subscriber in module triplestore_indexer.', 'status', TRUE);
   }
 
 }
