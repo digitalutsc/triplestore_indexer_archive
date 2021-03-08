@@ -110,6 +110,12 @@ class IndexingService implements TripleStoreIndexingInterface
         'Authorization: Basic'
       );
     }
+    else if ($config->get("method-of-auth") == 'jwt') {
+      $opts[CURLOPT_HTTPHEADER] = array(
+        'Content-type: application/ld+json',
+        'Authorization: Bearer islandora'
+      );
+    }
     curl_setopt_array($curl, $opts);
 
     $response = curl_exec($curl);
@@ -188,6 +194,12 @@ class IndexingService implements TripleStoreIndexingInterface
       $opts[CURLOPT_HTTPHEADER] = array(
         'Content-type: text/plain',
         'Authorization: Basic'
+      );
+    }
+    else if ($config->get("method-of-auth") == 'jwt') {
+      $opts[CURLOPT_HTTPHEADER] = array(
+        'Content-type: text/plain',
+        'Authorization: Bearer islandora'
       );
     }
     curl_setopt_array($curl, $opts);

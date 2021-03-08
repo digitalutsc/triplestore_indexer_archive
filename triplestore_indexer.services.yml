@@ -5,3 +5,8 @@ services:
   triplestore_indexer.indexing:
     class: Drupal\triplestore_indexer\IndexingService
     arguments: []
+  triplestore_indexer.indexed:
+    class: Drupal\triplestore_indexer\EventSubscriber\IndexedSubscriber
+    arguments: []
+    tags:
+      - { name: event_subscriber }

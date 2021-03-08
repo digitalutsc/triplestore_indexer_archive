@@ -36,6 +36,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
    */
   public function buildForm(array $form, FormStateInterface $form_state)
   {
+    print_log("form");
     $config = $this->config('triplestore_indexer.triplestoreindexerconfig');
 
     $form['container'] = array(
@@ -70,7 +71,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       '#options' => [
         '-1' => 'None',
         'digest' => 'Basic/Digest',
-        //'oauth' => 'OAuth',
+        'jwt' => 'JWT',
       ],
       '#ajax' => [
         'wrapper' => 'questions-fieldset-wrapper',
