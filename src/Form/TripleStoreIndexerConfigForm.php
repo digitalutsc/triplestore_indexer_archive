@@ -36,7 +36,6 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
    */
   public function buildForm(array $form, FormStateInterface $form_state)
   {
-    print_log("form");
     $config = $this->config('triplestore_indexer.triplestoreindexerconfig');
 
     $form['container'] = array(
