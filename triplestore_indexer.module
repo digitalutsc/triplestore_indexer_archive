@@ -8,6 +8,8 @@
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\advancedqueue\Entity\Queue;
 use Drupal\advancedqueue\Job;
+use Drush\Drush;
+
 
 /**
  * Implements hook_help().
@@ -147,9 +149,8 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
 
               //TODO: Run the cron by curl.
               global $base_url;
-              $cmd = "drush --uri=".$base_url." advancedqueue:queue:process " . $config->get("advancedqueue-id") . " 2>&1";
-              $output = drush_invoke("advancedqueue:queue:process",  [$config->get("advancedqueue-id") . " 2>&1"]);
-              print_log($output);
+              //$cmd = "drush --uri=".$base_url." advancedqueue:queue:process " . $config->get("advancedqueue-id") . " 2>&1";
+              $process = Drush::drush(Drush::aliasManager()->getSelf(), "advancedqueue:queue:process " . $config->get("advancedqueue-id") . " 2>&1");
             }
           }
         }

@@ -2,10 +2,18 @@
 
 namespace Drupal\triplestore_indexer\Form;
 
+use Consolidation\SiteAlias\SiteAlias;
+use Consolidation\SiteAlias\SiteAliasManager;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\advancedqueue\Entity\Queue;
 use Drupal\advancedqueue\Job;
+
+use Drush\Drush;
+use Consolidation\SiteAlias\SiteAliasManagerAwareInterface;
+use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
+use League\Container\Container;
+
 
 /**
  * Class TripleStoreIndexerConfigForm.
@@ -37,6 +45,21 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
   public function buildForm(array $form, FormStateInterface $form_state)
   {
     $config = $this->config('triplestore_indexer.triplestoreindexerconfig');
+
+    //TODO: Run the cron by curl.
+    global $base_url;
+    //$cmd = "drush --uri=".$base_url." advancedqueue:queue:process " . $config->get("advancedqueue-id") . " 2>&1";
+
+    $sitealias = new SiteAlias();
+    //$process = Drush::drush(Drush::aliasManager()->getSelf(), "advancedqueue:queue:process " . $config->get("advancedqueue-id") . " 2>&1")->run();
+
+    $process = Drush::drush(Drush::aliasManager()->getSelf(), "cache:rebuild")->run();
+
+    /*$command = \Drupal::service('path_alias.manager');
+    $command->setSiteAliasManager(new SiteAliasManager());
+    print "\r\nRun silly drush command devel entity updates...\r\n";
+    Drush::drush($command->siteAliasManager()->getSelf(), 'devel-entity-updates')->run();*/
+
 
     $form['container'] = array(
       '#type' => 'container',
