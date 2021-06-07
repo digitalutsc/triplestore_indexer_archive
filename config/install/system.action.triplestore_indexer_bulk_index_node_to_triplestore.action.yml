@@ -3,7 +3,7 @@ status: true
 dependencies:
   module:
     - triplestore_indexer
-id: triplestore_indexer_bulk_index_node_to_triplestore
-label: 'Bulk Index node to Triplestore (by triplestore_indexer module)'
+id: index_node_to_triplestore_advancedqueue
+label: 'Index node to Triplestore (via Advanced Queue)'
 type: node
-plugin: triplestore_indexer_bulk_index_node_to_triplestore
+plugin: index_node_to_triplestore_advancedqueue
