@@ -133,7 +133,7 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
         $payload = [
           'nid' => $entity->id(),
           'type' => $entity->getEntityTypeId(),
-          'action' => "insert"
+          'action' => $action
         ];
 
         if ($config->get('method-of-op') === 'advanced_queue') {
@@ -169,7 +169,7 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
         $payload = [
           'nid' => $entity->id(),
           'type' => $entity->getEntityTypeId(),
-          'action' => "update"
+          'action' => $action
         ];
 
         if ($config->get('method-of-op') === 'advanced_queue') {
@@ -198,6 +198,7 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
       break;
     }
     case 'delete':
+    case '[Update] delete if exist':
     {
       if (in_array("deleted", $triggeredEvents)
         && ($entity->getEntityTypeId() === 'node' && in_array($entity->bundle(), $indexedContentTypes)
@@ -207,7 +208,7 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
         $payload = [
           'nid' => $entity->id(),
           'type' => $entity->getEntityTypeId(),
-          'action' => "delete"
+          'action' => $action
         ];
         $service = \Drupal::service('triplestore_indexer.indexing');
         $others = $service->getOtherConmponentAssocNode($payload);

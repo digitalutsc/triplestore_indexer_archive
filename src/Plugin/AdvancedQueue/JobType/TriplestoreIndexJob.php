@@ -41,7 +41,9 @@ class TriplestoreIndexJob extends JobTypeBase
           $result = simplexml_load_string($response);
           break;
         }
-        case "delete": {
+        case "delete":
+        case '[Update] delete if exist':
+        {
           // for delete
           $nid = $payload['nid'];
           $type = str_replace("_", "/", $payload['type']);
@@ -72,9 +74,9 @@ class TriplestoreIndexJob extends JobTypeBase
       }
 
       if ($result['modified'] > 0 && $result['milliseconds'] > 0) {
-        return JobResult::success('Server response: '. $response);
+        return JobResult::success($response);
       }else {
-        return JobResult::failure('Server response: '. $response);
+        return JobResult::failure($response);
       }
     } catch (\Exception $e) {
       return JobResult::failure($e->getMessage());
