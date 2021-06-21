@@ -143,64 +143,25 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       }
     }
 
-    $form['container']['triplestore-server-config']['select-op-method'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Select method of operation:'),
-      '#options' => [
-        'advanced_queue' => 'Advanced Queue (Recommended)',
-        'action_hooks' => 'Drupal Entity Hooks',
-      ],
-      '#ajax' => [
-        'wrapper' => 'op-fieldset-wrapper',
-        'callback' => '::promptOpCallback',
-      ],
-      '#default_value' => ($config->get("method-of-op") !== null) ? $config->get("method-of-op") : "advanced_queue"
-    ];
-
     $form['container']['triplestore-server-config']['op-config'] = [
       '#type' => 'details',
-      '#title' => $this->t('How the indexing work?'),
+      '#title' => $this->t('Advanced Queue Configuration'),
       '#open' => TRUE,
       '#attributes' => ['id' => 'op-fieldset-wrapper'],
     ];
-    $form['container']['triplestore-server-config']['op-config']['description'] = [
-      '#markup' => $this->t('By default this option selected, the indexing will be executed immediately after a node or a taxonomy term is <a target="_blank" href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21entity.api.php/function/hook_entity_insert/9.0.x">created</a>, <a target="_blank" href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21entity.api.php/function/hook_entity_update/9.0.x">updated</a>, or <a target="_blank" href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21entity.api.php/function/hook_entity_delete/9.0.x">deleted</a>. (<strong>WARNING:</strong> it may effect the performance of the site if many nodes/taxonomy terms are being ingested in bulk.)'),
+    $queues = \Drupal::entityQuery('advancedqueue_queue')->execute();
+    $form['container']['triplestore-server-config']['op-config']['advancedqueue-id'] = array(
+      '#type' => 'select',
+      '#name' => 'advancedqueue-id',
+      '#title' => $this->t('Select a queue:'),
+      '#required' => TRUE,
+      '#default_value' => 1,
+      '#options' => $queues,
+      '#default_value' => ($config->get("advancedqueue-id") !== null) ? $config->get("advancedqueue-id") : "default",
+    );
+    $form['container']['triplestore-server-config']['op-config']['link-to-add-queue'] = [
+      '#markup' => $this->t('To create a new queue, <a href="/admin/config/system/queues/add" target="_blank">Click here</a>'),
     ];
-    $operation_type = ($config->get("method-of-op") !== null && !isset($form_state->getValues()['select-op-method'])) ? $config->get("method-of-op") : $form_state->getValues()['select-op-method'];
-    $operation_type = (empty($operation_type)) ?  "advanced_queue" : $operation_type;
-    if (!empty($operation_type)) {
-      unset($form['container']['triplestore-server-config']['op-config']['description']);
-      switch ($operation_type) {
-        case "advanced_queue": {
-          global $base_url;
-          $form['container']['triplestore-server-config']['op-config']['description'] = [
-            '#markup' => $this->t('<strong>[Highly recommended]</strong> The Indexing operations will be added to a queue, which can be scheduled to run with <a target="_blank" href="' . $base_url . '/admin/config/system/cron">Cron job</a> or <a target="_blank" href="https://drupalconsole.com/">Drupal Console</a> command (<code>drupal advancedqueue:queue:process default</code>).'),
-          ];
-
-          $queues = \Drupal::entityQuery('advancedqueue_queue')->execute();
-          $form['container']['triplestore-server-config']['op-config']['advancedqueue-id'] = array(
-            '#type' => 'select',
-            '#name' => 'advancedqueue-id',
-            '#title' => $this->t('Available queues:'),
-            '#required' => TRUE,
-            '#default_value' => 1,
-            '#options' => $queues,
-            '#default_value' => ($config->get("advancedqueue-id") !== null) ? $config->get("advancedqueue-id") : "default",
-          );
-          $form['container']['triplestore-server-config']['op-config']['link-to-add-queue'] = [
-            '#markup' => $this->t('To create a new queue, <a href="/admin/config/system/queues/add" target="_blank">Click here</a>'),
-          ];
-
-          break;
-        }
-        default: {
-          $form['container']['triplestore-server-config']['op-config']['description'] = [
-            '#markup' => $this->t('By default this option selected, the indexing will be executed immediately after a node or a taxonomy term is <a href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21entity.api.php/function/hook_entity_insert/9.0.x">created</a>, <a href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21entity.api.php/function/hook_entity_update/9.0.x">updated</a>, or <a href="https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21entity.api.php/function/hook_entity_delete/9.0.x">deleted</a>. (<strong>WARNING:</strong> it may effect the performance of the site if many nodes/taxonomy terms are being ingested in bulk.)'),
-          ];
-          break;
-        }
-      }
-    }
 
 
     $form['configuration'] = array(
@@ -209,15 +170,16 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
     $form['configuration']['#tree'] = true;
 
 
-    $form['events'] = array(
+    /*$form['events'] = array(
       '#type' => 'details',
       '#title' => $this
-        ->t('When to index:'),
+        ->t('Condition: When to index'),
       '#group' => 'configuration',
     );
 
     $form['events']['select-when'] = array(
       '#type' => 'checkboxes',
+      '#multiple' => true,
       '#title' => t('Select which event(s) to index:'),
       '#options' => array(
         'created' => t('When content are created.'),
@@ -225,12 +187,12 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
         'deleted' => t('When content are deleted.'),
       ),
       '#default_value' => array_keys(array_filter($config->get('events-to-index'))),
-    );
+    );*/
 
     $form['content-type'] = array(
       '#type' => 'details',
       '#title' => $this
-        ->t('Content Type'),
+        ->t('Condition: Node Bundle'),
       '#group' => 'configuration',
     );
 
@@ -245,12 +207,12 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
 
     $form['content-type']['select-content-types'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Which content type to be indexed:'),
+      '#title' => t('Select which content type(s) to be indexed:'),
       '#options' => $options_contentypes,
       '#default_value' => array_keys(array_filter($config->get('content-type-to-index'))),
     );
 
-    $vocabularies = \Drupal\taxonomy\Entity\Vocabulary::loadMultiple();
+    /*$vocabularies = \Drupal\taxonomy\Entity\Vocabulary::loadMultiple();
     $options_taxonomy = array();
     foreach ($vocabularies as $vocal) {
       $options_taxonomy[$vocal->id()] = $vocal->label();
@@ -263,10 +225,10 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
     );
     $form['taxonomy']['select-vocabulary'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Which vocabulary to be indexed:'),
+      '#title' => t('Select which vocabulary to be indexed:'),
       '#options' => $options_taxonomy,
       '#default_value' => array_keys(array_filter($config->get('taxonomy-to-index'))),
-    );
+    );*/
 
     $form['submit-save-config'] = array(
       '#type' => 'submit',
@@ -316,7 +278,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
     $configFactory->set('server-url', $form_state->getValues()['server-url'])
       ->set('namespace', $form_state->getValues()['namespace'])
       ->set('method-of-auth', $form_state->getValues()['select-auth-method'])
-      ->set('method-of-op', $form_state->getValues()['select-op-method']);
+      ->set('method-of-op', "advanced_queue");
     switch ($form_state->getValues()['select-auth-method']) {
       case 'digest':
       {
@@ -350,19 +312,10 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       }
     }
 
-    switch ($form_state->getValues()['select-op-method']) {
-      case "advanced_queue": {
-        $configFactory->set('advancedqueue-id', $form_state->getValues()['advancedqueue-id']);
-        break;
-      }
-      default: {
-        $configFactory->set('advancedqueue-id', "default");
-        break;
-      }
-    }
-    $configFactory->set('events-to-index', $form_state->getValues()['select-when']);
+    $configFactory->set('advancedqueue-id', $form_state->getValues()['advancedqueue-id']);
+    //$configFactory->set('events-to-index', $form_state->getValues()['select-when']);
     $configFactory->set('content-type-to-index', $form_state->getValues()['select-content-types']);
-    $configFactory->set('taxonomy-to-index', $form_state->getValues()['select-vocabulary']);
+    //$configFactory->set('taxonomy-to-index', $form_state->getValues()['select-vocabulary']);
     $configFactory->save();
 
     parent::submitForm($form, $form_state);
