@@ -62,8 +62,7 @@ class IndexingService implements TripleStoreIndexingInterface
       if (strpos($component['@id'], '/taxonomy/term/') !== false) {
         //check if this component is taxonomy, check with saved config if a term is set to be delete
         $vocal = getVocabularyFromTermID(getTermIDfromURI($component['@id']));
-        $indexedVocabulary =  array_keys(array_filter($config->get('taxonomy-to-index')));
-        if (isset($vocal) && in_array($vocal, $indexedVocabulary)) {
+        if (isset($vocal)) {
           array_push($others, $component['@id']);
         }
       }

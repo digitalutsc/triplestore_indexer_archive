@@ -9,7 +9,7 @@ use Drupal\Core\Session\AccountInterface;
  * Provides a Index content to Triplestore when node is deleted
  *
  * @Action(
- *   id = "delete_node_advancedqueue",
+ *   id = "delete_node_in_triplestore_advancedqueue",
  *   label = @Translation("Delete node in Triplestore [via Advanced Queue]"),
  *   type = "node",
  *   category = @Translation("Custom")

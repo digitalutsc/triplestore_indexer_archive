@@ -3,7 +3,7 @@ status: true
 dependencies:
   module:
     - triplestore_indexer
-id: delete_node_advancedqueue
+id: delete_node_in_triplestore_advancedqueue
 label: 'Delete node in Triplestore (via Advanced Queue)'
 type: node
-plugin: delete_node_advancedqueue
+plugin: delete_node_in_triplestore_advancedqueue

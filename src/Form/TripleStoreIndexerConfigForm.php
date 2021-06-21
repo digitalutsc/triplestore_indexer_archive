@@ -170,15 +170,16 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
     $form['configuration']['#tree'] = true;
 
 
-    $form['events'] = array(
+    /*$form['events'] = array(
       '#type' => 'details',
       '#title' => $this
-        ->t('When to index:'),
+        ->t('Condition: When to index'),
       '#group' => 'configuration',
     );
 
     $form['events']['select-when'] = array(
       '#type' => 'checkboxes',
+      '#multiple' => true,
       '#title' => t('Select which event(s) to index:'),
       '#options' => array(
         'created' => t('When content are created.'),
@@ -186,12 +187,12 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
         'deleted' => t('When content are deleted.'),
       ),
       '#default_value' => array_keys(array_filter($config->get('events-to-index'))),
-    );
+    );*/
 
     $form['content-type'] = array(
       '#type' => 'details',
       '#title' => $this
-        ->t('Content Type'),
+        ->t('Condition: Node Bundle'),
       '#group' => 'configuration',
     );
 
@@ -206,12 +207,12 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
 
     $form['content-type']['select-content-types'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Which content type to be indexed:'),
+      '#title' => t('Select which content type(s) to be indexed:'),
       '#options' => $options_contentypes,
       '#default_value' => array_keys(array_filter($config->get('content-type-to-index'))),
     );
 
-    $vocabularies = \Drupal\taxonomy\Entity\Vocabulary::loadMultiple();
+    /*$vocabularies = \Drupal\taxonomy\Entity\Vocabulary::loadMultiple();
     $options_taxonomy = array();
     foreach ($vocabularies as $vocal) {
       $options_taxonomy[$vocal->id()] = $vocal->label();
@@ -224,10 +225,10 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
     );
     $form['taxonomy']['select-vocabulary'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Which vocabulary to be indexed:'),
+      '#title' => t('Select which vocabulary to be indexed:'),
       '#options' => $options_taxonomy,
       '#default_value' => array_keys(array_filter($config->get('taxonomy-to-index'))),
-    );
+    );*/
 
     $form['submit-save-config'] = array(
       '#type' => 'submit',
@@ -312,9 +313,9 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
     }
 
     $configFactory->set('advancedqueue-id', $form_state->getValues()['advancedqueue-id']);
-    $configFactory->set('events-to-index', $form_state->getValues()['select-when']);
+    //$configFactory->set('events-to-index', $form_state->getValues()['select-when']);
     $configFactory->set('content-type-to-index', $form_state->getValues()['select-content-types']);
-    $configFactory->set('taxonomy-to-index', $form_state->getValues()['select-vocabulary']);
+    //$configFactory->set('taxonomy-to-index', $form_state->getValues()['select-vocabulary']);
     $configFactory->save();
 
     parent::submitForm($form, $form_state);
