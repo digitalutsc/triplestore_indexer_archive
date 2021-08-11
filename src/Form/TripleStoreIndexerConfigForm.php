@@ -258,7 +258,7 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
         t('Your Server URL is not valid, please check it again. <strong>Error message:</strong> '. $e->getMessage()));
     }
 
-    if($form_state->getValues()['select-op-method'] === 'advanced_queue') {
+    if($form_state->getValues()['select-op-method'] !== null && $form_state->getValues()['select-op-method'] === 'advanced_queue') {
       // validate if entering a valid machine name of queue
       $q = Queue::load($form_state->getValues()['advancedqueue-id']);
       if (!isset($q)) {
