@@ -46,7 +46,6 @@ function triplestore_indexer_theme()
 function triplestore_indexer_entity_insert(\Drupal\Core\Entity\EntityInterface $entity)
 {
   // trigger Index node to Triplestore action (delayed after jsonld url (ie. "?_format=jsonld") established).
-  // == executeIndexingAction('index_node_to_triplestore_advancedqueue', $entity);
   drupal_register_shutdown_function('executeIndexingAction', 'index_node_to_triplestore_advancedqueue', $entity);
 
 }
@@ -61,7 +60,6 @@ function triplestore_indexer_entity_insert(\Drupal\Core\Entity\EntityInterface $
 function triplestore_indexer_entity_update(\Drupal\Core\Entity\EntityInterface $entity)
 {
   // trigger Index node to Triplestore action (delayed after jsonld url (ie. "?_format=jsonld") established)
-  //executeIndexingAction('index_node_to_triplestore_advancedqueue', $entity);
   drupal_register_shutdown_function('executeIndexingAction', 'index_node_to_triplestore_advancedqueue', $entity);
 
 }
@@ -99,7 +97,7 @@ function executeIndexingAction(String $actionName, \Drupal\Core\Entity\EntityInt
  *
  * @param $thing
  */
-if (!function_exists('logging')) {
+if (!function_exists('print_log')) {
   function print_log($thing)
   {
     error_log(print_r($thing, true), 0);
@@ -119,6 +117,53 @@ if (!function_exists('logging')) {
   }
 }
 
+/**
+ * Debug function: display any variable to drupal Reports Log messages
+ *
+ */
+if (!function_exists('drupal_log')) {
+  function drupal_log($msg, $type="error")
+  {
+    switch($type) {
+      case "notice" : {
+        \Drupal::logger(basename(__FILE__, '.module'))->notice($msg);
+        break;
+      }
+      case "log" : {
+        \Drupal::logger(basename(__FILE__, '.module'))->log(\Drupal\Core\Logger\RfcLogLevel::NOTICE, $msg);
+        break;
+      }
+      case "warning" : {
+        \Drupal::logger(basename(__FILE__, '.module'))->warning($msg);
+        break;
+      }
+      case "alert" : {
+        \Drupal::logger(basename(__FILE__, '.module'))->alert($msg);
+        break;
+      }
+      case "critical" : {
+        \Drupal::logger(basename(__FILE__, '.module'))->critical($msg);
+        break;
+      }
+      case "debug" : {
+        \Drupal::logger(basename(__FILE__, '.module'))->debug($msg);
+        break;
+      }
+      case "info" : {
+        \Drupal::logger(basename(__FILE__, '.module'))->info($msg);
+        break;
+      }
+      case "emergency" : {
+        \Drupal::logger(basename(__FILE__, '.module'))->emergency($msg);
+        break;
+      }
+      default: {
+        \Drupal::logger(basename(__FILE__, '.module'))->error($msg);
+        break;
+      }
+    }
+  }
+}
 
 /**
  * funcation call embedded after hook_insert,hook_update,hook_delete executed
