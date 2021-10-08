@@ -194,7 +194,9 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
         $payload = [
           'nid' => $entity->id(),
           'type' => $entity->getEntityTypeId(),
-          'action' => $action
+          'action' => $action,
+            'max_tries' => $config->get("aqj-max-retries"),
+            'retry_delay' => $config->get("aqj-retry_delay"),
         ];
 
         // Create a job and add to Advanced Queue
@@ -214,7 +216,9 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
         $payload = [
           'nid' => $entity->id(),
           'type' => $entity->getEntityTypeId(),
-          'action' => $action
+          'action' => $action,
+            'max_tries' => $config->get("aqj-max-retries"),
+            'retry_delay' => $config->get("aqj-retry_delay"),
         ];
         $service = \Drupal::service('triplestore_indexer.indexing');
         $others = $service->getOtherConmponentAssocNode($payload);

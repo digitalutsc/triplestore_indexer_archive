@@ -163,8 +163,24 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       '#markup' => $this->t('To create a new queue, <a href="/admin/config/system/queues/add" target="_blank">Click here</a>'),
     ];
 
+      $form['container']['triplestore-server-config']['op-config']['number-of-retries'] = array(
+          '#type' => 'number',
+          '#title' => $this
+              ->t('Number of retries:'),
+          '#description' => $this->t("If a job is failed to run, set number of retries"),
+          '#default_value' => ($config->get("aqj-max-retries") !== null) ? $config->get("aqj-max-retries") : 5
+      );
 
-    $form['configuration'] = array(
+      $form['container']['triplestore-server-config']['op-config']['retries-delay'] = array(
+          '#type' => 'number',
+          '#title' => $this
+              ->t('Retry Delay (in seconds):'),
+          '#description' => $this->t("Set the delay time (in seconds) for a job to re-run each time."),
+          '#default_value' => ($config->get("aqj-retry_delay") !== null) ? $config->get("aqj-retry_delay") : 100
+      );
+
+
+      $form['configuration'] = array(
       '#type' => 'vertical_tabs',
     );
     $form['configuration']['#tree'] = true;
@@ -279,6 +295,10 @@ class TripleStoreIndexerConfigForm extends ConfigFormBase
       ->set('namespace', $form_state->getValues()['namespace'])
       ->set('method-of-auth', $form_state->getValues()['select-auth-method'])
       ->set('method-of-op', "advanced_queue");
+
+      $configFactory->set("aqj-max-retries", $form_state->getValues()['number-of-retries']);
+      $configFactory->set("aqj-retry_delay", $form_state->getValues()['retries-delay']);
+
     switch ($form_state->getValues()['select-auth-method']) {
       case 'digest':
       {

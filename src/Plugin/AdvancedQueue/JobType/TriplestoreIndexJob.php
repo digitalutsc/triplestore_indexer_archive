@@ -24,6 +24,11 @@ class TriplestoreIndexJob extends JobTypeBase
       $status = 0;
 
       $payload = $job->getPayload();
+
+        // set retry config
+        $this->pluginDefinition['max_retries'] = $payload['max_tries'];
+        $this->pluginDefinition['retry_delay'] = $payload['retry_delay'];
+
       $service = \Drupal::service('triplestore_indexer.indexing');
 
       switch ($payload['action']) {
