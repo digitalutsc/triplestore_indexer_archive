@@ -7,49 +7,49 @@ use Drupal\advancedqueue\JobResult;
 use Drupal\advancedqueue\Plugin\AdvancedQueue\JobType\JobTypeBase;
 
 /**
+ * Advanced Queue Job definition.
+ *
  * @AdvancedQueueJobType(
  *   id = "triplestore_index_job",
  *   label = @Translation("Triplestore Indexing"),
  * )
  */
-class TriplestoreIndexJob extends JobTypeBase
-{
+class TriplestoreIndexJob extends JobTypeBase {
+
   /**
    * {@inheritdoc}
    */
-  public function process(Job $job)
-  {
+  public function process(Job $job) {
     try {
       global $base_url;
       $status = 0;
 
       $payload = $job->getPayload();
 
-        // set retry config
-        $this->pluginDefinition['max_retries'] = $payload['max_tries'];
-        $this->pluginDefinition['retry_delay'] = $payload['retry_delay'];
+      // Set retry config.
+      $this->pluginDefinition['max_retries'] = $payload['max_tries'];
+      $this->pluginDefinition['retry_delay'] = $payload['retry_delay'];
 
       $service = \Drupal::service('triplestore_indexer.indexing');
 
       switch ($payload['action']) {
-        case "insert": {
-          //for insert
+        case "insert":
+          // For insert.
           $data = $service->serialization($payload);
           $response = $service->post($data);
           $result = simplexml_load_string($response);
           break;
-        }
-        case "update": {
-          // for update
+
+        case "update":
+          // For update.
           $data = $service->serialization($payload);
           $response = $service->put($payload, $data);
           $result = simplexml_load_string($response);
           break;
-        }
+
         case "delete":
         case '[Update] delete if exist':
-        {
-          // for delete
+          // For delete.
           $nid = $payload['nid'];
           $type = str_replace("_", "/", $payload['type']);
 
@@ -63,28 +63,31 @@ class TriplestoreIndexJob extends JobTypeBase
             $result = simplexml_load_string($response);
           }
 
-          // delete terms and author associated with the deleting node
+          // Delete terms and author associated with the deleting node.
           if (is_array($payload['others'])) {
             foreach ($payload['others'] as $ouri) {
-              if (isset($ouri))
+              if (isset($ouri)) {
                 $response = $service->delete("<$ouri>");
+              }
             }
           }
-
           break;
-        }
-        default: {
+
+        default:
           return JobResult::failure("No action assigned.");
-        }
+
       }
 
       if ($result['modified'] > 0 && $result['milliseconds'] > 0) {
         return JobResult::success($response);
-      }else {
+      }
+      else {
         return JobResult::failure($response);
       }
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
       return JobResult::failure($e->getMessage());
     }
   }
+
 }

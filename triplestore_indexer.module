@@ -5,6 +5,9 @@
  * Contains triplestore_indexer.module.
  */
 
+use Drupal\taxonomy\Entity\Term;
+use Drupal\Core\Logger\RfcLogLevel;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\advancedqueue\Entity\Queue;
 use Drupal\advancedqueue\Job;
@@ -12,8 +15,7 @@ use Drupal\advancedqueue\Job;
 /**
  * Implements hook_help().
  */
-function triplestore_indexer_help($route_name, RouteMatchInterface $route_match)
-{
+function triplestore_indexer_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     // Main module help for the triplestore_indexer module.
     case 'help.page.triplestore_indexer':
@@ -29,8 +31,7 @@ function triplestore_indexer_help($route_name, RouteMatchInterface $route_match)
 /**
  * Implements hook_theme().
  */
-function triplestore_indexer_theme()
-{
+function triplestore_indexer_theme() {
   return [
     'triplestore_indexer' => [
       'render element' => 'children',
@@ -39,51 +40,30 @@ function triplestore_indexer_theme()
 }
 
 /**
- * Implementing action hook_entity_insert
- *
- * @param \Drupal\Core\Entity\EntityInterface $entity
+ * Implements hook_entity_insert().
  */
-function triplestore_indexer_entity_insert(\Drupal\Core\Entity\EntityInterface $entity)
-{
-  // trigger Index node to Triplestore action (delayed after jsonld url (ie. "?_format=jsonld") established).
+function triplestore_indexer_entity_insert(EntityInterface $entity) {
   drupal_register_shutdown_function('executeIndexingAction', 'index_node_to_triplestore_advancedqueue', $entity);
-
 }
 
 /**
- * Implementing action hook_enitty_update
- *
- * @param $entity
- * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
- * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * Implements hook_entity_update().
  */
-function triplestore_indexer_entity_update(\Drupal\Core\Entity\EntityInterface $entity)
-{
-  // trigger Index node to Triplestore action (delayed after jsonld url (ie. "?_format=jsonld") established)
+function triplestore_indexer_entity_update(EntityInterface $entity) {
   drupal_register_shutdown_function('executeIndexingAction', 'index_node_to_triplestore_advancedqueue', $entity);
-
 }
 
 /**
- * Implementing action hook_entity_delete
- *
- * @param \Drupal\Core\Entity\EntityInterface $entity
+ * Implements hook_entity_delete().
  */
-function triplestore_indexer_entity_predelete(\Drupal\Core\Entity\EntityInterface $entity)
-{
-  // trigger delete node in jsonaction (delayed after jsonld url (ie. "?_format=jsonld") established)
-  executeIndexingAction('delete_node_in_triplestore_advancedqueue', $entity);
+function triplestore_indexer_entity_predelete(EntityInterface $entity) {
+  execute_indexing_action('delete_node_in_triplestore_advancedqueue', $entity);
 }
 
 /**
- * Execute action with action name
- * @param \Drupal\Core\Entity\EntityInterface $entity
- * @param String $
- * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
- * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * Execute action with action name.
  */
-function executeIndexingAction(String $actionName, \Drupal\Core\Entity\EntityInterface $entity) {
-  // trigger generate Fits action
+function execute_indexing_action(string $actionName, EntityInterface $entity) {
   $action = \Drupal::entityTypeManager()
     ->getStorage('action')
     ->load($actionName);
@@ -93,113 +73,117 @@ function executeIndexingAction(String $actionName, \Drupal\Core\Entity\EntityInt
 }
 
 /**
- * Debug function: display any variable to error log
+ * Debug function: display any variable to error log.
  *
  * @param $thing
  */
 if (!function_exists('print_log')) {
-  function print_log($thing)
-  {
-    error_log(print_r($thing, true), 0);
+
+  /**
+   * Logging in apache log.
+   */
+  function print_log($thing) {
+    error_log(print_r($thing, TRUE), 0);
   }
 
 }
 /**
- * Debug function: display any variable to current webpage
+ * Debug function: display any variable to current webpage.
+ *
  * @param $thing
  */
 if (!function_exists('logging')) {
-  function logging($thing)
-  {
+
+  /**
+   * Logging in webpage.
+   */
+  function logging($thing) {
     echo "<pre>";
     print_r($thing);
     echo "</pre>";
   }
+
 }
 
 /**
- * Debug function: display any variable to drupal Reports Log messages
- *
+ * Debug function: display any variable to drupal Reports Log messages.
  */
 if (!function_exists('drupal_log')) {
-  function drupal_log($msg, $type="error")
-  {
-    switch($type) {
-      case "notice" : {
+
+  /**
+   * Logging in Recent Log messages.
+   */
+  function drupal_log($msg, $type = "error") {
+    switch ($type) {
+      case "notice":
         \Drupal::logger(basename(__FILE__, '.module'))->notice($msg);
         break;
-      }
-      case "log" : {
-        \Drupal::logger(basename(__FILE__, '.module'))->log(\Drupal\Core\Logger\RfcLogLevel::NOTICE, $msg);
+
+      case "log":
+        \Drupal::logger(basename(__FILE__, '.module'))->log(RfcLogLevel::NOTICE, $msg);
         break;
-      }
-      case "warning" : {
+
+      case "warning":
         \Drupal::logger(basename(__FILE__, '.module'))->warning($msg);
         break;
-      }
-      case "alert" : {
+
+      case "alert":
         \Drupal::logger(basename(__FILE__, '.module'))->alert($msg);
         break;
-      }
-      case "critical" : {
+
+      case "critical":
         \Drupal::logger(basename(__FILE__, '.module'))->critical($msg);
         break;
-      }
-      case "debug" : {
+
+      case "debug":
         \Drupal::logger(basename(__FILE__, '.module'))->debug($msg);
         break;
-      }
-      case "info" : {
+
+      case "info":
         \Drupal::logger(basename(__FILE__, '.module'))->info($msg);
         break;
-      }
-      case "emergency" : {
+
+      case "emergency":
         \Drupal::logger(basename(__FILE__, '.module'))->emergency($msg);
         break;
-      }
-      default: {
+
+      default:
         \Drupal::logger(basename(__FILE__, '.module'))->error($msg);
         break;
-      }
     }
   }
+
 }
 
 /**
- * funcation call embedded after hook_insert,hook_update,hook_delete executed
- *
- * @param \Drupal\Core\Entity\EntityInterface $entity
- * @param $action
+ * Funcation call embedded after hook_insert,hook_update,hook_delete executed.
  */
-function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
-{
-  //TODO: check if the entity is content type is selected and triggered event selected
+function queue_process(EntityInterface $entity, $action) {
   $config = \Drupal::config('triplestore_indexer.triplestoreindexerconfig');
 
-  // fix warning when Config form hasn't been setup
+  // Fix warning when Config form hasn't been setup.
   if (!isset($config)) {
     return;
   }
 
-  // get condition of which content type will be indexed
+  // Get condition of which content type will be indexed.
   $indexedContentTypes = (is_array($config->get('content-type-to-index'))) ? array_keys(array_filter($config->get('content-type-to-index'))) : [];
 
   switch ($action) {
     case 'insert':
     case 'update':
-    {
       if ($entity->getEntityTypeId() === 'node' && in_array($entity->bundle(), $indexedContentTypes)) {
 
-        // Create a job and add to Advanced Queue
+        // Create a job and add to Advanced Queue.
         $payload = [
           'nid' => $entity->id(),
           'type' => $entity->getEntityTypeId(),
           'action' => $action,
-            'max_tries' => $config->get("aqj-max-retries"),
-            'retry_delay' => $config->get("aqj-retry_delay"),
+          'max_tries' => $config->get("aqj-max-retries"),
+          'retry_delay' => $config->get("aqj-retry_delay"),
         ];
 
-        // Create a job and add to Advanced Queue
+        // Create a job and add to Advanced Queue.
         $job = Job::create('triplestore_index_job', $payload);
         if ($job instanceof Job) {
           $q = Queue::load($config->get("advancedqueue-id"));
@@ -207,23 +191,22 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
         }
       }
       break;
-    }
+
     case 'delete':
     case '[Update] delete if exist':
-    {
       if ($entity->getEntityTypeId() === 'node' && in_array($entity->bundle(), $indexedContentTypes)) {
-        // get @id of other components (eg. terms, media file) associated with node
+        // Get @id of other components associated with node.
         $payload = [
           'nid' => $entity->id(),
           'type' => $entity->getEntityTypeId(),
           'action' => $action,
-            'max_tries' => $config->get("aqj-max-retries"),
-            'retry_delay' => $config->get("aqj-retry_delay"),
+          'max_tries' => $config->get("aqj-max-retries"),
+          'retry_delay' => $config->get("aqj-retry_delay"),
         ];
         $service = \Drupal::service('triplestore_indexer.indexing');
         $others = $service->getOtherConmponentAssocNode($payload);
 
-        // Create a job and add to Advanced Queue
+        // Create a job and add to Advanced Queue.
         if (is_array($others) && count($others) > 0) {
           $payload['others'] = $others;
         }
@@ -235,28 +218,24 @@ function queueIndexing(\Drupal\Core\Entity\EntityInterface $entity, $action)
         }
       }
       break;
-    }
+
     default:
-    {
       break;
-    }
   }
 }
 
 /**
- * get Term ID out of serialized URI
- *
- * @param String $uri
- * @return string|string[]
+ * Get Term ID out of serialized URI.
  */
-function getTermIDfromURI(String $uri) {
+function get_termid_from_uri(string $uri) {
   global $base_url;
-  return str_replace("?_format=jsonld","",  str_replace($base_url."/taxonomy/term/", "", $uri));
+  return str_replace("?_format=jsonld", "", str_replace($base_url . "/taxonomy/term/", "", $uri));
 }
 
-function getVocabularyFromTermID(int $term_id) {
-  $term = \Drupal\taxonomy\Entity\Term::load($term_id);
+/**
+ * Get Vocabulary from Term ID.
+ */
+function get_vocabulary_from_termid(int $term_id) {
+  $term = Term::load($term_id);
   return $term->bundle();
 }
-
-

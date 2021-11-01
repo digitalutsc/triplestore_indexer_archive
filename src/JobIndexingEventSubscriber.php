@@ -1,29 +1,29 @@
 <?php
 
-
 namespace Drupal\triplestore_indexer;
 
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Drupal\advancedqueue\Event\AdvancedQueueEvents;
 use Drupal\advancedqueue\Event\JobEvent;
-use Monolog\Handler\SlackWebhookHandler;
-use Monolog\Logger;
 use Drupal\advancedqueue\Job;
 
-class JobIndexingEventSubscriber implements \Symfony\Component\EventDispatcher\EventSubscriberInterface
-{
+/**
+ * Class JobIndexingEventSubscriber definition.
+ */
+class JobIndexingEventSubscriber implements EventSubscriberInterface {
 
   /**
    * Method that is triggered on the response event.
    *
    * @param \Drupal\advancedqueue\Event\JobEvent $event
+   *   Event job definition.
    *
    * @return bool
    *   Successful response to event.
    *
    * @throws \Exception
    */
-  public function onRespond(JobEvent $event)
-  {
+  public function onRespond(JobEvent $event) {
     try {
       $job = $event->getJob();
       $state = $job->getState();
@@ -33,18 +33,20 @@ class JobIndexingEventSubscriber implements \Symfony\Component\EventDispatcher\E
         return FALSE;
       }
     }
-    catch(\Exception $e) {
+    catch (\Exception $e) {
       $logger = \Drupal::service('logger.factory');
       $logger->get('triplestore_indexing_queue')->error($e->getMessage());
     }
   }
 
   /**
+   * Implements getSubscribedEvents().
+   *
    * @inheritDoc
    */
-  public static function getSubscribedEvents()
-  {
+  public static function getSubscribedEvents() {
     $events[AdvancedQueueEvents::POST_PROCESS][] = ['onRespond'];
     return $events;
   }
+
 }
