@@ -6,7 +6,7 @@ use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Provides a a Bulk Index node to Triplestore action.
+ * Provides a Bulk Index node to Triplestore action.
  *
  * @Action(
  *   id = "index_node_to_triplestore_advancedqueue",
@@ -36,11 +36,11 @@ class IndexNodeToTriplestore extends ActionBase {
   public function execute($node = NULL) {
     /** @var \Drupal\node\NodeInterface $node */
 
-    // delete previous indexed (if applicable)
-    queueIndexing($node, '[Update] delete if exist');
+    // Delete previous indexed (if applicable)
+    queue_process($node, '[Update] delete if exist');
 
-    // index the latest version of the node
-    queueIndexing($node, 'insert');
+    // Index the latest version of the node.
+    queue_process($node, 'insert');
   }
 
 }
