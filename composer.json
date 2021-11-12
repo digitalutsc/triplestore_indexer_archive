@@ -1,7 +1,7 @@
 {
     "name": "triplestore_indexer",
     "type": "drupal-module",
-    "description": "This Drupal 8 or 9's module provide a system to get the Json-LD representation (which is established from JSON-LD REST Services module) of any content type and taxonomy in Drupal and index that into Blazegraph.",
+    "description": "This module provide a system to get the Json-LD representation (which is established from JSON-LD REST Services module) of any content type and taxonomy in Drupal and index that into Blazegraph.",
     "keywords": [
         "triplestore",
         "blazegraph"
@@ -24,8 +24,16 @@
             "role": "Maintainer"
         }
     ],
+    "repositories": {
+        "drupal": {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        }
+    },
     "require": {
-        "islandora/jsonld": "*"
+        "islandora/jsonld": "*",
+        "drupal/advancedqueue": "*",
+        "drupal/restui": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^8",
