@@ -1,13 +1,48 @@
 {
     "name": "triplestore_indexer",
     "type": "drupal-module",
-    "description": "This module will listening to Content event and indexing it to RDF and send result to Triple store",
+    "description": "This Drupal 8 or 9's module provide a system to get the Json-LD representation (which is established from JSON-LD REST Services module) of any content type and taxonomy in Drupal and index that into Blazegraph.",
     "keywords": [
+        "triplestore",
+        "blazegraph"
     ],
     "homepage": "https://www.drupal.org/project/triplestore_indexer",
     "minimum-stability": "dev",
     "support": {
         "issues": "https://www.drupal.org/project/issues/triplestore_indexer",
-        "source": "http://cgit.drupalcode.org/triplestore_indexer"
+        "source": "https://git.drupalcode.org/project/triplestore_indexer"
+    },
+    "authors": [
+        {
+            "name": "The University of Toronto Scarborough Library's Digital Scholarship Unit (DSU)",
+            "email": "digitalscholarship@utsc.utoronto.ca",
+            "role": "Owner"
+        },
+        {
+            "name": "Kyle Huynh",
+            "email": "kyle.huynh205@gmail.com",
+            "role": "Maintainer"
+        }
+    ],
+    "require": {
+        "islandora/jsonld": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8",
+        "squizlabs/php_codesniffer": "^3",
+        "drupal/coder": "*",
+        "sebastian/phpcpd": "*"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "./vendor/bin/phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer"
+        ],
+        "post-update-cmd": [
+            "./vendor/bin/phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer"
+        ],
+        "check": [
+            "./vendor/bin/phpcs --standard=Drupal --ignore=*.md,vendor --extensions=php,module,inc,install,test,profile,theme,css,info .",
+            "./vendor/bin/phpcpd --names='*.module,*.inc,*.test,*.php' --exclude=vendor ."
+        ]
     }
 }
