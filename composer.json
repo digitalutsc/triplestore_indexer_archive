@@ -1,5 +1,5 @@
 {
-    "name": "triplestore_indexer",
+    "name": "digitalutsc/triplestore_indexer",
     "type": "drupal-module",
     "description": "This module provide a system to get the Json-LD representation (which is established from JSON-LD REST Services module) of any content type and taxonomy in Drupal and index that into Blazegraph.",
     "keywords": [
@@ -8,6 +8,7 @@
     ],
     "homepage": "https://www.drupal.org/project/triplestore_indexer",
     "minimum-stability": "dev",
+    "license": "GPL-2.0-only",
     "support": {
         "issues": "https://www.drupal.org/project/issues/triplestore_indexer",
         "source": "https://git.drupalcode.org/project/triplestore_indexer"
