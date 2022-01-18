@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Main functions and hook implementations of the RDF Entity Test module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function triplestore_indexer_test_entity_base_field_info(EntityTypeInterface $entity_type)
+{
+
+    if (\Drupal::moduleHandler()->moduleExists('jsonld')
+        || \Drupal::moduleHandler()->moduleExists('rest')
+        || \Drupal::moduleHandler()->moduleExists('restui')
+        || \Drupal::moduleHandler()->moduleExists('advancedqueue')
+    ) {
+        return;
+    }
+}

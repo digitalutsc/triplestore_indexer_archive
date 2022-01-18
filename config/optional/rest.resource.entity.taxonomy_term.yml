@@ -1,0 +1,48 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - basic_auth
+    - jsonld
+    - jwt
+    - serialization
+    - taxonomy
+    - user
+  enforced:
+    module:
+id: entity.taxonomy_term
+plugin_id: 'entity:taxonomy_term'
+granularity: method
+configuration:
+  GET:
+    supported_formats:
+      - jsonld
+      - json
+    supported_auth:
+      - jwt_auth
+      - basic_auth
+      - cookie
+  POST:
+    supported_formats:
+      - jsonld
+      - json
+    supported_auth:
+      - jwt_auth
+      - basic_auth
+      - cookie
+  DELETE:
+    supported_formats:
+      - jsonld
+      - json
+    supported_auth:
+      - jwt_auth
+      - basic_auth
+      - cookie
+  PATCH:
+    supported_formats:
+      - jsonld
+      - json
+    supported_auth:
+      - jwt_auth
+      - basic_auth
+      - cookie
