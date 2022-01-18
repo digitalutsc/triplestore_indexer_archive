@@ -4,6 +4,15 @@ description: 'This module will listening to Content event and indexing it to RDF
 core_version_requirement: '^8.8 || ^9'
 package: 'custom'
 dependencies:
-  - drupal:jsonld
-  - advancedqueue:advancedqueue
-  - drupal:restui
+  - 'drupal:jsonld'
+  - 'advancedqueue:advancedqueue'
+  - 'drupal:restui'
+  - 'basic_auth'
+  - 'file'
+  - 'jsonld'
+  - 'jwt'
+  - 'serialization'
+  - 'user'
+  - 'media'
+  - 'node'
+  - 'taxonomy'

@@ -11,6 +11,16 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
+ * Implements hook_install
+ */
+function triplestore_indexer_test_install() {
+    \Drupal::configFactory()->getEditable('rest.resource.entity.file')->delete();
+    \Drupal::configFactory()->getEditable('rest.resource.entity.media')->delete();
+    \Drupal::configFactory()->getEditable('rest.resource.entity.node')->delete();
+    \Drupal::configFactory()->getEditable('rest.resource.entity.taxonomy_term')->delete();
+}
+
+/**
  * Implements hook_entity_base_field_info().
  */
 function triplestore_indexer_test_entity_base_field_info(EntityTypeInterface $entity_type)

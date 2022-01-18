@@ -18,7 +18,7 @@ class LoadTest extends BrowserTestBase
      *
      * @var array
      */
-    protected static $modules = ['node', 'taxonomy', 'comment', 'image', 'file', 'text', 'node_test', 'menu_ui', 'rest','restui', 'islandora_defaults', /*'islandora_defaults', */'jsonld', 'advancedqueue','triplestore_indexer_test','triplestore_indexer'];
+    protected static $modules = ['node', 'taxonomy', 'comment', 'image', 'file', 'text', 'node_test', 'menu_ui', 'rest', /*'islandora_defaults',*/ 'jsonld', 'advancedqueue', 'triplestore_indexer_test', 'triplestore_indexer'];
 
     /**
      * A user with permission to administer site configuration.
@@ -140,14 +140,9 @@ class LoadTest extends BrowserTestBase
         $createdArticle = $this->drupalGetNodeByTitle($nodeArticleTitle);
 
         $url = $createdArticle->toUrl();
-        //$jsonld_string = $base_url . $url->toString() . "?_format=jsonld";
-        $jsonld_string = $base_url . $url->toString() . "?_format=json";
-        //$jsonld_string = $base_url . $url->toString();
+        $jsonld_string = $base_url . $url->toString() . "?_format=jsonld";
         $request = $this->client->get($jsonld_string, ['verify' => true]);
         $this->assertEqual(200, $request->getStatusCode());
-
-        //$this->drupalGet($jsonld_string);
-        //$assert->statusCodeEquals(200);
     }
 
     /**
@@ -183,13 +178,9 @@ class LoadTest extends BrowserTestBase
 
         $createdArticle = $this->drupalGetNodeByTitle($nodePageTitle);
         $url = $createdArticle->toUrl();
-        //$jsonld_string = $base_url . $url->toString() . "?_format=jsonld";
-        $jsonld_string = $base_url . $url->toString() . "?_format=json";
-        //$jsonld_string = $base_url . $url->toString();
-        //$this->drupalGet($jsonld_string);
-        //$assert->statusCodeEquals(200);
-
+        $jsonld_string = $base_url . $url->toString() . "?_format=jsonld";
         $request = $this->client->get($jsonld_string, ['verify' => true]);
+
         $this->assertEqual(200, $request->getStatusCode());
     }
 
